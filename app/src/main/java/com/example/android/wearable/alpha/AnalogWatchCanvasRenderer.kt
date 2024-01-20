@@ -38,6 +38,7 @@ import com.example.android.wearable.alpha.utils.COLOR_STYLE_SETTING
 import com.example.android.wearable.alpha.utils.DRAW_HOUR_PIPS_STYLE_SETTING
 import com.example.android.wearable.alpha.utils.WATCH_HAND_LENGTH_STYLE_SETTING
 import java.time.ZonedDateTime
+import java.time.format.DateTimeFormatter
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -91,7 +92,7 @@ class AnalogWatchCanvasRenderer(
     private val textPaint = Paint().apply {
         isAntiAlias = true
         textSize = context.resources.getDimensionPixelSize(R.dimen.hour_mark_size).toFloat()
-        color = Color.RED
+        color = Color.WHITE
     }
 
     // Changed when setting changes cause a change in the minute hand arm (triggered by user in
@@ -221,7 +222,13 @@ class AnalogWatchCanvasRenderer(
 
         canvas.drawColor(backgroundColor)
 
-        canvas.drawText("Hello world", bounds.exactCenterX(), bounds.exactCenterY(), textPaint)
+        displayTime(canvas, bounds, zonedDateTime)
+    }
+
+    private fun displayTime(canvas: Canvas, bounds: Rect, zonedDateTime: ZonedDateTime){
+        val timeFormatter = DateTimeFormatter.ofPattern("H:mm:s")
+        val time = zonedDateTime.format(timeFormatter)
+        canvas.drawText(time, bounds.exactCenterX(), bounds.exactCenterY(), textPaint)
     }
 
     companion object {
