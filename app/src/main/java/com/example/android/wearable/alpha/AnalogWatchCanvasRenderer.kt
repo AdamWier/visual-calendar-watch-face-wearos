@@ -223,6 +223,13 @@ class AnalogWatchCanvasRenderer(
         canvas.drawColor(backgroundColor)
 
         displayTime(canvas, bounds, zonedDateTime)
+        displayDate(canvas, bounds, zonedDateTime)
+    }
+
+    private fun displayDate(canvas: Canvas, bounds: Rect, zonedDateTime: ZonedDateTime){
+        val timeFormatter = DateTimeFormatter.ofPattern("E, MMMM d")
+        val time = zonedDateTime.format(timeFormatter)
+        canvas.drawText(time, bounds.exactCenterX() + 20, bounds.exactCenterY() - 20, textPaint)
     }
 
     private fun displayTime(canvas: Canvas, bounds: Rect, zonedDateTime: ZonedDateTime){
