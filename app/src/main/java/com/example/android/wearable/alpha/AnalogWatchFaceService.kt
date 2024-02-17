@@ -25,6 +25,7 @@ import androidx.wear.watchface.WatchFaceType
 import androidx.wear.watchface.WatchState
 import androidx.wear.watchface.style.CurrentUserStyleRepository
 import androidx.wear.watchface.style.UserStyleSchema
+import com.example.android.wearable.alpha.http.CalendarGetter
 import com.example.android.wearable.alpha.utils.createComplicationSlotManager
 import com.example.android.wearable.alpha.utils.createUserStyleSchema
 
@@ -55,6 +56,8 @@ class AnalogWatchFaceService : WatchFaceService() {
         currentUserStyleRepository: CurrentUserStyleRepository
     ): WatchFace {
         Log.d(TAG, "createWatchFace()")
+
+        CalendarGetter(applicationContext).getCalendarInfo()
 
         // Creates class that renders the watch face.
         val renderer = AnalogWatchCanvasRenderer(
