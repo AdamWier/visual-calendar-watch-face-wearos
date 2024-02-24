@@ -224,11 +224,6 @@ class AnalogWatchCanvasRenderer(
             watchFaceColors.activeBackgroundColor
         }
 
-//        Log.i(
-//            "Cal",
-//            "First item: ${calendarGetter[0].toString()}.",
-//        )
-
         canvas.drawColor(backgroundColor)
         displayTime(canvas, bounds, zonedDateTime)
         displayDate(canvas, bounds, zonedDateTime)

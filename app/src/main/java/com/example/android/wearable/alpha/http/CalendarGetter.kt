@@ -10,7 +10,7 @@ import com.google.gson.JsonObject
 class CalendarGetter(applicationContext: Context) {
     private val apiRequestQueue = Volley.newRequestQueue(applicationContext)
 
-    var cal: Array<JsonObject>? = null
+    var cal: MutableList<JsonObject> = mutableListOf()
 
     fun getCalendarInfo() {
         val request = GsonRequest(
@@ -18,7 +18,7 @@ class CalendarGetter(applicationContext: Context) {
             clazz = Array<JsonObject>::class.java,
             method = Request.Method.GET,
             listener = {
-                this.cal = it
+                this.cal.addAll(it)
             },
             errorListener = {
                 Log.i("Volley", it.toString())
