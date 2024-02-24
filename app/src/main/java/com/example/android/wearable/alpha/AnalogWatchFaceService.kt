@@ -55,11 +55,6 @@ class AnalogWatchFaceService : WatchFaceService() {
         complicationSlotsManager: ComplicationSlotsManager,
         currentUserStyleRepository: CurrentUserStyleRepository
     ): WatchFace {
-        Log.d(TAG, "createWatchFace()")
-
-        CalendarGetter(applicationContext).getCalendarInfo()
-
-        // Creates class that renders the watch face.
         val renderer = AnalogWatchCanvasRenderer(
             context = applicationContext,
             surfaceHolder = surfaceHolder,
@@ -69,7 +64,6 @@ class AnalogWatchFaceService : WatchFaceService() {
             canvasType = CanvasType.HARDWARE
         )
 
-        // Creates the watch face.
         return WatchFace(
             watchFaceType = WatchFaceType.DIGITAL,
             renderer = renderer

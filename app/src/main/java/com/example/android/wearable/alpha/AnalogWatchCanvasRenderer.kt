@@ -34,6 +34,7 @@ import androidx.wear.watchface.style.UserStyleSetting
 import com.example.android.wearable.alpha.data.watchface.ColorStyleIdAndResourceIds
 import com.example.android.wearable.alpha.data.watchface.WatchFaceColorPalette.Companion.convertToWatchFaceColorPalette
 import com.example.android.wearable.alpha.data.watchface.WatchFaceData
+import com.example.android.wearable.alpha.http.CalendarGetter
 import com.example.android.wearable.alpha.utils.COLOR_STYLE_SETTING
 import com.example.android.wearable.alpha.utils.DRAW_HOUR_PIPS_STYLE_SETTING
 import com.example.android.wearable.alpha.utils.WATCH_HAND_LENGTH_STYLE_SETTING
@@ -67,6 +68,8 @@ class AnalogWatchCanvasRenderer(
     FRAME_PERIOD_MS_DEFAULT,
     clearWithBackgroundTintBeforeRenderingHighlightLayer = false
 ) {
+    val calendarGetter = CalendarGetter(context)
+
     class AnalogSharedAssets : SharedAssets {
         override fun onDestroy() {
         }
@@ -100,6 +103,7 @@ class AnalogWatchCanvasRenderer(
     private var armLengthChangedRecalculateClockHands: Boolean = false
 
     init {
+        calendarGetter.getCalendarInfo()
         scope.launch {
             currentUserStyleRepository.userStyle.collect { userStyle ->
                 updateWatchFaceData(userStyle)
@@ -220,8 +224,12 @@ class AnalogWatchCanvasRenderer(
             watchFaceColors.activeBackgroundColor
         }
 
-        canvas.drawColor(backgroundColor)
+//        Log.i(
+//            "Cal",
+//            "First item: ${calendarGetter[0].toString()}.",
+//        )
 
+        canvas.drawColor(backgroundColor)
         displayTime(canvas, bounds, zonedDateTime)
         displayDate(canvas, bounds, zonedDateTime)
     }
