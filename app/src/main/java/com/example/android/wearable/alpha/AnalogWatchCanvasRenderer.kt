@@ -227,6 +227,14 @@ class AnalogWatchCanvasRenderer(
         canvas.drawColor(backgroundColor)
         displayTime(canvas, bounds, zonedDateTime)
         displayDate(canvas, bounds, zonedDateTime)
+        displayCalendarInfo(canvas, bounds)
+    }
+
+    private fun displayCalendarInfo(canvas: Canvas, bounds: Rect){
+        val event = this.calendarGetter.cal.find { it.get("start").asJsonObject.get("dateTime") != null }
+            ?: return
+        val summary = event.get("summary").asJsonPrimitive.asString
+        canvas.drawText(summary, bounds.exactCenterX() - 40 , bounds.exactCenterY() + 40, textPaint)
     }
 
     private fun displayDate(canvas: Canvas, bounds: Rect, zonedDateTime: ZonedDateTime){
