@@ -5,16 +5,18 @@ import android.util.Log
 import com.android.volley.Request
 
 import com.android.volley.toolbox.Volley;
+import com.example.android.wearable.alpha.R
 import com.google.gson.JsonObject
 
 class CalendarGetter(applicationContext: Context) {
+    private val apiKey = applicationContext.getString(R.string.CALENDAR_API_KEY)
     private val apiRequestQueue = Volley.newRequestQueue(applicationContext)
 
-    var cal: MutableList<JsonObject> = mutableListOf()
+    val cal: MutableList<JsonObject> = mutableListOf()
 
     fun getCalendarInfo() {
         val request = GsonRequest(
-            url = "https://us-central1-watch-ea9b9.cloudfunctions.net/mycalendar?KEY=cb991ef5-c8ee-4d7f-96d2-2ec37d114058",
+            url = "https://us-central1-watch-ea9b9.cloudfunctions.net/mycalendar?KEY=${this.apiKey}",
             clazz = Array<JsonObject>::class.java,
             method = Request.Method.GET,
             listener = {
