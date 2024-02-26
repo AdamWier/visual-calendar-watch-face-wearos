@@ -38,6 +38,7 @@ import com.example.android.wearable.alpha.http.CalendarGetter
 import com.example.android.wearable.alpha.utils.COLOR_STYLE_SETTING
 import com.example.android.wearable.alpha.utils.DRAW_HOUR_PIPS_STYLE_SETTING
 import com.example.android.wearable.alpha.utils.WATCH_HAND_LENGTH_STYLE_SETTING
+import com.google.gson.JsonObject
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
 import kotlinx.coroutines.CoroutineScope
@@ -68,7 +69,7 @@ class AnalogWatchCanvasRenderer(
     FRAME_PERIOD_MS_DEFAULT,
     clearWithBackgroundTintBeforeRenderingHighlightLayer = false
 ) {
-    val calendarGetter = CalendarGetter(context)
+    private val calendarGetter = CalendarGetter(context)
 
     class AnalogSharedAssets : SharedAssets {
         override fun onDestroy() {
@@ -231,10 +232,8 @@ class AnalogWatchCanvasRenderer(
     }
 
     private fun displayCalendarInfo(canvas: Canvas, bounds: Rect){
-        val event = this.calendarGetter.cal.find { it.get("start").asJsonObject.get("dateTime") != null }
-            ?: return
-        val summary = event.get("summary").asJsonPrimitive.asString
-        canvas.drawText(summary, bounds.exactCenterX() - 40 , bounds.exactCenterY() + 40, textPaint)
+        canvas.drawText(this.calendarGetter.emoji, bounds.exactCenterX() - 60 , bounds.exactCenterY() + 60, textPaint)
+        canvas.drawText(this.calendarGetter.summaryText, bounds.exactCenterX() - 40 , bounds.exactCenterY() + 40, textPaint)
     }
 
     private fun displayDate(canvas: Canvas, bounds: Rect, zonedDateTime: ZonedDateTime){
