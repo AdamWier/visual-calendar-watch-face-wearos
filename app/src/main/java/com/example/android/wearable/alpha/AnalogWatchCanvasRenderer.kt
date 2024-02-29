@@ -26,19 +26,10 @@ import androidx.wear.watchface.ComplicationSlotsManager
 import androidx.wear.watchface.DrawMode
 import androidx.wear.watchface.Renderer
 import androidx.wear.watchface.WatchState
-import androidx.wear.watchface.complications.rendering.CanvasComplicationDrawable
-import androidx.wear.watchface.complications.rendering.ComplicationDrawable
 import androidx.wear.watchface.style.CurrentUserStyleRepository
-import androidx.wear.watchface.style.UserStyle
-import androidx.wear.watchface.style.UserStyleSetting
-import com.example.android.wearable.alpha.data.watchface.ColorStyleIdAndResourceIds
 import com.example.android.wearable.alpha.data.watchface.WatchFaceColorPalette.Companion.convertToWatchFaceColorPalette
 import com.example.android.wearable.alpha.data.watchface.WatchFaceData
-import com.example.android.wearable.alpha.http.CalendarGetter
-import com.example.android.wearable.alpha.utils.COLOR_STYLE_SETTING
-import com.example.android.wearable.alpha.utils.DRAW_HOUR_PIPS_STYLE_SETTING
-import com.example.android.wearable.alpha.utils.WATCH_HAND_LENGTH_STYLE_SETTING
-import com.google.gson.JsonObject
+import com.example.android.wearable.alpha.Calendar.Calendar
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
 import kotlinx.coroutines.CoroutineScope
@@ -69,7 +60,7 @@ class AnalogWatchCanvasRenderer(
     FRAME_PERIOD_MS_DEFAULT,
     clearWithBackgroundTintBeforeRenderingHighlightLayer = false
 ) {
-    private val calendarGetter = CalendarGetter(context)
+    private val calendar = Calendar(context)
 
     class AnalogSharedAssets : SharedAssets {
         override fun onDestroy() {
@@ -85,111 +76,26 @@ class AnalogWatchCanvasRenderer(
     // here (in the renderer) through a Kotlin Flow.
     private var watchFaceData: WatchFaceData = WatchFaceData()
 
-    // Converts resource ids into Colors and ComplicationDrawable.
     private var watchFaceColors = convertToWatchFaceColorPalette(
         context,
         watchFaceData.activeColorStyle,
         watchFaceData.ambientColorStyle
     )
 
-    // Used to paint the main hour hand text with the hour pips, i.e., 3, 6, 9, and 12 o'clock.
     private val textPaint = Paint().apply {
         isAntiAlias = true
         textSize = context.resources.getDimensionPixelSize(R.dimen.hour_mark_size).toFloat()
         color = Color.WHITE
     }
 
-    // Changed when setting changes cause a change in the minute hand arm (triggered by user in
-    // updateUserStyle() via userStyleRepository.addUserStyleListener()).
-    private var armLengthChangedRecalculateClockHands: Boolean = false
-
     init {
-        calendarGetter.getCalendarInfo()
         scope.launch {
-            currentUserStyleRepository.userStyle.collect { userStyle ->
-                updateWatchFaceData(userStyle)
-            }
+            calendar.getCalendarInfo()
         }
     }
 
     override suspend fun createSharedAssets(): AnalogSharedAssets {
         return AnalogSharedAssets()
-    }
-
-    /*
-     * Triggered when the user makes changes to the watch face through the settings activity. The
-     * function is called by a flow.
-     */
-    private fun updateWatchFaceData(userStyle: UserStyle) {
-        Log.d(TAG, "updateWatchFace(): $userStyle")
-
-        var newWatchFaceData: WatchFaceData = watchFaceData
-
-        // Loops through user style and applies new values to watchFaceData.
-        for (options in userStyle) {
-            when (options.key.id.toString()) {
-                COLOR_STYLE_SETTING -> {
-                    val listOption = options.value as
-                        UserStyleSetting.ListUserStyleSetting.ListOption
-
-                    newWatchFaceData = newWatchFaceData.copy(
-                        activeColorStyle = ColorStyleIdAndResourceIds.getColorStyleConfig(
-                            listOption.id.toString()
-                        )
-                    )
-                }
-                DRAW_HOUR_PIPS_STYLE_SETTING -> {
-                    val booleanValue = options.value as
-                        UserStyleSetting.BooleanUserStyleSetting.BooleanOption
-
-                    newWatchFaceData = newWatchFaceData.copy(
-                        drawHourPips = booleanValue.value
-                    )
-                }
-                WATCH_HAND_LENGTH_STYLE_SETTING -> {
-                    val doubleValue = options.value as
-                        UserStyleSetting.DoubleRangeUserStyleSetting.DoubleRangeOption
-
-                    // The arm lengths are usually only calculated the first time the watch face is
-                    // loaded to reduce the ops in the onDraw(). Because we updated the minute hand
-                    // watch length, we need to trigger a recalculation.
-                    armLengthChangedRecalculateClockHands = true
-
-                    // Updates length of minute hand based on edits from user.
-                    val newMinuteHandDimensions = newWatchFaceData.minuteHandDimensions.copy(
-                        lengthFraction = doubleValue.value.toFloat()
-                    )
-
-                    newWatchFaceData = newWatchFaceData.copy(
-                        minuteHandDimensions = newMinuteHandDimensions
-                    )
-                }
-            }
-        }
-
-        // Only updates if something changed.
-        if (watchFaceData != newWatchFaceData) {
-            watchFaceData = newWatchFaceData
-
-            // Recreates Color and ComplicationDrawable from resource ids.
-            watchFaceColors = convertToWatchFaceColorPalette(
-                context,
-                watchFaceData.activeColorStyle,
-                watchFaceData.ambientColorStyle
-            )
-
-            // Applies the user chosen complication color scheme changes. ComplicationDrawables for
-            // each of the styles are defined in XML so we need to replace the complication's
-            // drawables.
-            for ((_, complication) in complicationSlotsManager.complicationSlots) {
-                ComplicationDrawable.getDrawable(
-                    context,
-                    watchFaceColors.complicationStyleDrawableId
-                )?.let {
-                    (complication.renderer as CanvasComplicationDrawable).drawable = it
-                }
-            }
-        }
     }
 
     override fun onDestroy() {
@@ -232,8 +138,8 @@ class AnalogWatchCanvasRenderer(
     }
 
     private fun displayCalendarInfo(canvas: Canvas, bounds: Rect){
-        canvas.drawText(this.calendarGetter.emoji, bounds.exactCenterX() - 60 , bounds.exactCenterY() + 60, textPaint)
-        canvas.drawText(this.calendarGetter.summaryText, bounds.exactCenterX() - 40 , bounds.exactCenterY() + 40, textPaint)
+        canvas.drawText(this.calendar.emoji, bounds.exactCenterX() - 60 , bounds.exactCenterY() + 60, textPaint)
+        canvas.drawText(this.calendar.summaryText, bounds.exactCenterX() - 40 , bounds.exactCenterY() + 40, textPaint)
     }
 
     private fun displayDate(canvas: Canvas, bounds: Rect, zonedDateTime: ZonedDateTime){

@@ -1,4 +1,4 @@
-package com.example.android.wearable.alpha.http;
+package com.example.android.wearable.alpha.Calendar;
 
 import android.content.Context;
 import android.util.Log
@@ -8,7 +8,7 @@ import com.android.volley.toolbox.Volley;
 import com.example.android.wearable.alpha.R
 import com.google.gson.JsonObject
 
-class CalendarGetter(applicationContext: Context) {
+class Calendar(applicationContext: Context) {
     private val apiKey = applicationContext.getString(R.string.CALENDAR_API_KEY)
     private val apiRequestQueue = Volley.newRequestQueue(applicationContext)
 

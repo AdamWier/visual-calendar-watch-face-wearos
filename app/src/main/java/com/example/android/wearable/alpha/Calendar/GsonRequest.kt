@@ -1,4 +1,4 @@
-package com.example.android.wearable.alpha.http
+package com.example.android.wearable.alpha.Calendar
 
 import com.android.volley.NetworkResponse
 import com.android.volley.ParseError
