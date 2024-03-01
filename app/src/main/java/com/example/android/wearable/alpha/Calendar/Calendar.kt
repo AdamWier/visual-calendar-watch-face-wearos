@@ -7,6 +7,7 @@ import com.android.volley.Request
 import com.android.volley.toolbox.Volley;
 import com.example.android.wearable.alpha.R
 import com.google.gson.JsonObject
+import com.vdurmont.emoji.EmojiParser
 
 class Calendar(applicationContext: Context) {
     private val apiKey = applicationContext.getString(R.string.CALENDAR_API_KEY)
@@ -21,10 +22,9 @@ class Calendar(applicationContext: Context) {
             .asJsonObject.get("dateTime") != null }
             ?: return
         val summary = event.get("summary").asJsonPrimitive.asString
-        //Shield emoji not caught, fix regex
-        val emojiRegex = Regex("(\\u00a9|\\u00ae|[\\u2000-\\u3300]|\\ud83c[\\ud000-\\udfff]|\\ud83d[\\ud000-\\udfff]|\\ud83e[\\ud000-\\udfff])")
-        this.emoji = emojiRegex.find(summary)?.value ?: ""
-        this.summaryText = emojiRegex.replace(summary, "").trim()
+        this.emoji = EmojiParser.extractEmojis(summary)[0] ?: ""
+        val summaryWithFirstEmojiRemoved = EmojiParser.parseToAliases(summary).replaceFirst(Regex(":(\\w|-)+:"), "")
+        this.summaryText = EmojiParser.parseToUnicode(summaryWithFirstEmojiRemoved)
     }
 
     fun getCalendarInfo() {
