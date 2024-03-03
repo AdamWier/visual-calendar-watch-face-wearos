@@ -8,6 +8,10 @@ import com.android.volley.toolbox.Volley;
 import com.example.android.wearable.alpha.R
 import com.google.gson.JsonObject
 import com.vdurmont.emoji.EmojiParser
+import java.time.Duration
+import java.time.LocalDateTime
+import java.time.ZoneId
+import java.time.ZonedDateTime
 
 class Calendar(applicationContext: Context) {
     private val apiKey = applicationContext.getString(R.string.CALENDAR_API_KEY)
@@ -16,8 +20,31 @@ class Calendar(applicationContext: Context) {
     private val eventList: MutableList<JsonObject> = mutableListOf()
     var emoji: String = ""
     var summaryText: String = ""
+    private val currentEvent get() = this.eventList.find { it.get("start")
+        .asJsonObject.get("dateTime") != null } ?: null
+    fun getPercentage (zonedDateTime: ZonedDateTime): Any {
+            if(this.currentEvent == null) return 0
+            val startDateTime = this.getZonedDateTime(this.currentEvent!!.get("start").asJsonObject)
+            val endDateTime = this.getZonedDateTime(this.currentEvent!!.get("end").asJsonObject)
+
+            val eventDuration = Duration.between(startDateTime, endDateTime)
+            val elapsedDuration = Duration.between(startDateTime, zonedDateTime)
+            val percentageDecimal = elapsedDuration.seconds.toFloat() / eventDuration.seconds.toFloat()
+
+            return percentageDecimal * 100
+    }
+
+    private fun getZonedDateTime(googleDateTime: JsonObject): ZonedDateTime {
+        val dateTimeString = googleDateTime.get("dateTime").asJsonPrimitive.asString.split('+')[0]
+        val dateTimeTimeZoneString = googleDateTime.get("timeZone").asJsonPrimitive.asString
+
+        val localDateTime = LocalDateTime.parse(dateTimeString)
+        val zoneId = ZoneId.of(dateTimeTimeZoneString)
+        return localDateTime.atZone(zoneId)
+    }
 
     private fun separateEmojiFromSummary() {
+        //replace ?
         val event = this.eventList.find { it.get("start")
             .asJsonObject.get("dateTime") != null }
             ?: return

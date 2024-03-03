@@ -135,6 +135,12 @@ class AnalogWatchCanvasRenderer(
         displayTime(canvas, bounds, zonedDateTime)
         displayDate(canvas, bounds, zonedDateTime)
         displayCalendarInfo(canvas, bounds)
+        displayPercentage(canvas, bounds, zonedDateTime)
+    }
+
+    private fun displayPercentage(canvas: Canvas, bounds: Rect, zonedDateTime: ZonedDateTime){
+        canvas.drawText(this.calendar.getPercentage(zonedDateTime).toString(), bounds.exactCenterX() - 80 , bounds.exactCenterY() + 80, textPaint)
+
     }
 
     private fun displayCalendarInfo(canvas: Canvas, bounds: Rect){
