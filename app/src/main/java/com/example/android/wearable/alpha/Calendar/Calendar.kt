@@ -16,14 +16,15 @@ import java.time.ZonedDateTime
 class Calendar(applicationContext: Context) {
     private val apiKey = applicationContext.getString(R.string.CALENDAR_API_KEY)
     private val apiRequestQueue = Volley.newRequestQueue(applicationContext)
+    private var requestInProgress = false
 
     private val eventList: MutableList<JsonObject> = mutableListOf()
     var emoji: String = ""
     var summaryText: String = ""
     private val currentEvent get() = this.eventList.find { it.get("start")
         .asJsonObject.get("dateTime") != null } ?: null
-    fun getPercentage (zonedDateTime: ZonedDateTime): Any {
-            if(this.currentEvent == null) return 0
+    fun getPercentage (zonedDateTime: ZonedDateTime): Float {
+            if(this.currentEvent == null) return 0F
             val startDateTime = this.getZonedDateTime(this.currentEvent!!.get("start").asJsonObject)
             val endDateTime = this.getZonedDateTime(this.currentEvent!!.get("end").asJsonObject)
 
@@ -55,16 +56,22 @@ class Calendar(applicationContext: Context) {
     }
 
     fun getCalendarInfo() {
+        if(requestInProgress) return
+        requestInProgress = true
+        Log.i("Volley", "called")
         val request = GsonRequest(
             url = "https://us-central1-watch-ea9b9.cloudfunctions.net/mycalendar?KEY=${this.apiKey}",
             clazz = Array<JsonObject>::class.java,
             method = Request.Method.GET,
             listener = {
+                this.eventList.clear()
                 this.eventList.addAll(it)
                 this.separateEmojiFromSummary()
+                this.requestInProgress = false
             },
             errorListener = {
                 Log.i("Volley", it.toString())
+                requestInProgress = false
             })
         this.apiRequestQueue.add(request)
     }
