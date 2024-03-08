@@ -19,9 +19,12 @@ import android.content.Context
 import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
+import android.graphics.Path
 import android.graphics.Rect
+import android.graphics.RectF
 import android.util.Log
 import android.view.SurfaceHolder
+import androidx.core.graphics.toRectF
 import androidx.wear.watchface.ComplicationSlotsManager
 import androidx.wear.watchface.DrawMode
 import androidx.wear.watchface.Renderer
@@ -30,6 +33,7 @@ import androidx.wear.watchface.style.CurrentUserStyleRepository
 import com.example.android.wearable.alpha.data.watchface.WatchFaceColorPalette.Companion.convertToWatchFaceColorPalette
 import com.example.android.wearable.alpha.data.watchface.WatchFaceData
 import com.example.android.wearable.alpha.Calendar.Calendar
+import com.google.android.material.progressindicator.CircularProgressIndicator
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
 import kotlinx.coroutines.CoroutineScope
@@ -82,11 +86,28 @@ class AnalogWatchCanvasRenderer(
         watchFaceData.ambientColorStyle
     )
 
+    private val progressBarStrokeWidth = 25F
+
     private val textPaint = Paint().apply {
         isAntiAlias = true
         textSize = context.resources.getDimensionPixelSize(R.dimen.hour_mark_size).toFloat()
         color = Color.WHITE
     }
+
+    private val circlePaint = Paint().apply {
+        isAntiAlias = true
+        color = Color.WHITE
+        style = Paint.Style.STROKE
+        strokeWidth = progressBarStrokeWidth
+    }
+
+    private val progressPaint = Paint().apply {
+        isAntiAlias = true
+        color = Color.RED
+        style = Paint.Style.STROKE
+        strokeWidth = progressBarStrokeWidth
+    }
+
 
     init {
         scope.launch {
@@ -131,22 +152,34 @@ class AnalogWatchCanvasRenderer(
             watchFaceColors.activeBackgroundColor
         }
 
-        canvas.drawColor(backgroundColor)
-        displayTime(canvas, bounds, zonedDateTime)
-        displayDate(canvas, bounds, zonedDateTime)
-        displayCalendarInfo(canvas, bounds)
-
         val percentage = this.calendar.getPercentage(zonedDateTime)
         if (percentage >= 100) {
             this.calendar.getCalendarInfo()
         }
-        displayPercentage(canvas, bounds, zonedDateTime, percentage)
+
+        canvas.drawColor(backgroundColor);
+        displayTime(canvas, bounds, zonedDateTime);
+        displayDate(canvas, bounds, zonedDateTime);
+        displayCalendarInfo(canvas, bounds);
+        displayProgressBar(canvas, bounds, zonedDateTime, percentage);
     }
 
-    private fun displayPercentage(canvas: Canvas, bounds: Rect, zonedDateTime: ZonedDateTime, percentage: Float){
-        canvas.drawText(percentage.toString(), bounds.exactCenterX() - 80 , bounds.exactCenterY() + 80, textPaint)
-
+    private fun displayProgressBar(canvas: Canvas, bounds: Rect, zonedDateTime: ZonedDateTime, percentage: Float){
+        val radius = (bounds.width() / 2).toFloat() - this.progressBarStrokeWidth/2F;
+        canvas.drawCircle(bounds.exactCenterX(), bounds.exactCenterY(), radius, circlePaint);
+        canvas.drawArc(getProgressBarBounds(bounds), 270F, 360 * (percentage / 100), false, progressPaint);
     }
+
+    private fun getProgressBarBounds(bounds: Rect): RectF {
+        val progressBounds = bounds.toRectF()
+        progressBounds.right = progressBounds.right - 25F/2F
+        progressBounds.left = progressBounds.left + 25F/2F
+        progressBounds.bottom = progressBounds.bottom - 25F/2F
+        progressBounds.top = progressBounds.top + 25F/2F
+        return progressBounds
+    }
+
+
 
     private fun displayCalendarInfo(canvas: Canvas, bounds: Rect){
         canvas.drawText(this.calendar.emoji, bounds.exactCenterX() - 60 , bounds.exactCenterY() + 60, textPaint)
