@@ -1,10 +1,10 @@
-package com.example.android.wearable.alpha.Calendar;
+package com.example.android.wearable.alpha.Calendar
 
-import android.content.Context;
+import android.content.Context
 import android.util.Log
 import com.android.volley.Request
 
-import com.android.volley.toolbox.Volley;
+import com.android.volley.toolbox.Volley
 import com.example.android.wearable.alpha.R
 import com.example.android.wearable.alpha.getZonedDateTime
 import com.example.android.wearable.alpha.notification.NotificationCreator

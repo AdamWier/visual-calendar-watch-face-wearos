@@ -1,9 +1,9 @@
-package com.example.android.wearable.alpha.scheduling;
+package com.example.android.wearable.alpha.scheduling
 
-import java.util.concurrent.Executors;
+import java.util.concurrent.Executors
 import java.util.concurrent.ScheduledFuture
 
-class Scheduler() {
+class Scheduler {
     private val scheduler = Executors.newScheduledThreadPool(1)
     private val scheduledTasks: MutableList<ScheduledFuture<*>> = mutableListOf()
 

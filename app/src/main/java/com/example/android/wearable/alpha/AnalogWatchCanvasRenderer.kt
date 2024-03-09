@@ -157,17 +157,17 @@ class AnalogWatchCanvasRenderer(
             this.calendar.getCalendarInfo()
         }
 
-        canvas.drawColor(backgroundColor);
-        displayTime(canvas, bounds, zonedDateTime);
-        displayDate(canvas, bounds, zonedDateTime);
-        displayCalendarInfo(canvas, bounds);
-        displayProgressBar(canvas, bounds, zonedDateTime, percentage);
+        canvas.drawColor(backgroundColor)
+        displayTime(canvas, bounds, zonedDateTime)
+        displayDate(canvas, bounds, zonedDateTime)
+        displayCalendarInfo(canvas, bounds)
+        displayProgressBar(canvas, bounds, percentage)
     }
 
-    private fun displayProgressBar(canvas: Canvas, bounds: Rect, zonedDateTime: ZonedDateTime, percentage: Float){
-        val radius = (bounds.width() / 2).toFloat() - this.progressBarStrokeWidth/2F;
-        canvas.drawCircle(bounds.exactCenterX(), bounds.exactCenterY(), radius, circlePaint);
-        canvas.drawArc(getProgressBarBounds(bounds), 270F, 360 * (percentage / 100), false, progressPaint);
+    private fun displayProgressBar(canvas: Canvas, bounds: Rect, percentage: Float){
+        val radius = (bounds.width() / 2).toFloat() - this.progressBarStrokeWidth/2F
+        canvas.drawCircle(bounds.exactCenterX(), bounds.exactCenterY(), radius, circlePaint)
+        canvas.drawArc(getProgressBarBounds(bounds), 270F, 360 * (percentage / 100), false, progressPaint)
     }
 
     private fun getProgressBarBounds(bounds: Rect): RectF {
