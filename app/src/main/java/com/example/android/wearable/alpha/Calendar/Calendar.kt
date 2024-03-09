@@ -34,7 +34,7 @@ class Calendar(applicationContext: Context, private val notificationCreator: Not
             val elapsedDuration = Duration.between(startDateTime, zonedDateTime)
             val percentageDecimal = elapsedDuration.seconds.toFloat() / eventDuration.seconds.toFloat()
 
-            return percentageDecimal * 100
+            return Math.max(percentageDecimal * 100, 0F)
     }
 
 
@@ -51,7 +51,6 @@ class Calendar(applicationContext: Context, private val notificationCreator: Not
     fun getCalendarInfo() {
         if(requestInProgress) return
         requestInProgress = true
-        Log.i("Volley", "called")
         val request = GsonRequest(
             url = "https://us-central1-watch-ea9b9.cloudfunctions.net/mycalendar?KEY=${this.apiKey}",
             clazz = Array<JsonObject>::class.java,

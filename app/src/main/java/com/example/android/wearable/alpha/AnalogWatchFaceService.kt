@@ -23,6 +23,9 @@ import androidx.wear.watchface.WatchFaceService
 import androidx.wear.watchface.WatchFaceType
 import androidx.wear.watchface.WatchState
 import androidx.wear.watchface.style.CurrentUserStyleRepository
+import com.example.android.wearable.alpha.Calendar.Calendar
+import com.example.android.wearable.alpha.notification.NotificationCreator
+import com.example.android.wearable.alpha.scheduling.Scheduler
 
 /**
  * Handles much of the boilerplate needed to implement a watch face (minus rendering code; see
@@ -36,19 +39,22 @@ class AnalogWatchFaceService : WatchFaceService() {
         complicationSlotsManager: ComplicationSlotsManager,
         currentUserStyleRepository: CurrentUserStyleRepository
     ): WatchFace {
+        val calendar = Calendar(applicationContext, NotificationCreator(applicationContext), Scheduler())
+
         val renderer = AnalogWatchCanvasRenderer(
             context = applicationContext,
             surfaceHolder = surfaceHolder,
             watchState = watchState,
             complicationSlotsManager = complicationSlotsManager,
             currentUserStyleRepository = currentUserStyleRepository,
-            canvasType = CanvasType.HARDWARE
+            canvasType = CanvasType.HARDWARE,
+            calendar = calendar
         )
 
         return WatchFace(
             watchFaceType = WatchFaceType.DIGITAL,
             renderer = renderer
-        )
+        ).setTapListener(TapListener(calendar))
     }
 
     companion object {

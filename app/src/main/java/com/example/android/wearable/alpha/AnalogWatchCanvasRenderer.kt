@@ -32,8 +32,6 @@ import androidx.wear.watchface.style.CurrentUserStyleRepository
 import com.example.android.wearable.alpha.data.watchface.WatchFaceColorPalette.Companion.convertToWatchFaceColorPalette
 import com.example.android.wearable.alpha.data.watchface.WatchFaceData
 import com.example.android.wearable.alpha.Calendar.Calendar
-import com.example.android.wearable.alpha.notification.NotificationCreator
-import com.example.android.wearable.alpha.scheduling.Scheduler
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
 import kotlinx.coroutines.CoroutineScope
@@ -55,7 +53,8 @@ class AnalogWatchCanvasRenderer(
     watchState: WatchState,
     private val complicationSlotsManager: ComplicationSlotsManager,
     currentUserStyleRepository: CurrentUserStyleRepository,
-    canvasType: Int
+    canvasType: Int,
+    private val calendar: Calendar,
 ) : Renderer.CanvasRenderer2<AnalogWatchCanvasRenderer.AnalogSharedAssets>(
     surfaceHolder,
     currentUserStyleRepository,
@@ -64,8 +63,6 @@ class AnalogWatchCanvasRenderer(
     FRAME_PERIOD_MS_DEFAULT,
     clearWithBackgroundTintBeforeRenderingHighlightLayer = false
 ) {
-    private val calendar = Calendar(context, NotificationCreator(context), Scheduler())
-
     class AnalogSharedAssets : SharedAssets {
         override fun onDestroy() {
         }
