@@ -6,14 +6,15 @@ import com.android.volley.Request
 
 import com.android.volley.toolbox.Volley;
 import com.example.android.wearable.alpha.R
+import com.example.android.wearable.alpha.getZonedDateTime
+import com.example.android.wearable.alpha.notification.NotificationCreator
+import com.example.android.wearable.alpha.scheduling.Scheduler
 import com.google.gson.JsonObject
 import com.vdurmont.emoji.EmojiParser
 import java.time.Duration
-import java.time.LocalDateTime
-import java.time.ZoneId
 import java.time.ZonedDateTime
 
-class Calendar(applicationContext: Context) {
+class Calendar(applicationContext: Context, private val notificationCreator: NotificationCreator, private val scheduler: Scheduler) {
     private val apiKey = applicationContext.getString(R.string.CALENDAR_API_KEY)
     private val apiRequestQueue = Volley.newRequestQueue(applicationContext)
     private var requestInProgress = false
@@ -23,10 +24,11 @@ class Calendar(applicationContext: Context) {
     var summaryText: String = ""
     private val currentEvent get() = this.eventList.find { it.get("start")
         .asJsonObject.get("dateTime") != null } ?: null
+
     fun getPercentage (zonedDateTime: ZonedDateTime): Float {
             if(this.currentEvent == null) return 0F
-            val startDateTime = this.getZonedDateTime(this.currentEvent!!.get("start").asJsonObject)
-            val endDateTime = this.getZonedDateTime(this.currentEvent!!.get("end").asJsonObject)
+            val startDateTime = getZonedDateTime(this.currentEvent!!.get("start").asJsonObject)
+            val endDateTime = getZonedDateTime(this.currentEvent!!.get("end").asJsonObject)
 
             val eventDuration = Duration.between(startDateTime, endDateTime)
             val elapsedDuration = Duration.between(startDateTime, zonedDateTime)
@@ -35,17 +37,8 @@ class Calendar(applicationContext: Context) {
             return percentageDecimal * 100
     }
 
-    private fun getZonedDateTime(googleDateTime: JsonObject): ZonedDateTime {
-        val dateTimeString = googleDateTime.get("dateTime").asJsonPrimitive.asString.split('+')[0]
-        val dateTimeTimeZoneString = googleDateTime.get("timeZone").asJsonPrimitive.asString
-
-        val localDateTime = LocalDateTime.parse(dateTimeString)
-        val zoneId = ZoneId.of(dateTimeTimeZoneString)
-        return localDateTime.atZone(zoneId)
-    }
 
     private fun separateEmojiFromSummary() {
-        //replace ?
         val event = this.eventList.find { it.get("start")
             .asJsonObject.get("dateTime") != null }
             ?: return
@@ -64,10 +57,13 @@ class Calendar(applicationContext: Context) {
             clazz = Array<JsonObject>::class.java,
             method = Request.Method.GET,
             listener = {
+                this.requestInProgress = false
                 this.eventList.clear()
+                this.scheduler.cancelAllTasks()
                 this.eventList.addAll(it)
                 this.separateEmojiFromSummary()
-                this.requestInProgress = false
+                val notificationTasks = this.notificationCreator.createNotificationTasks(this.currentEvent)
+                notificationTasks.forEach(this.scheduler::scheduleTask)
             },
             errorListener = {
                 Log.i("Volley", it.toString())
