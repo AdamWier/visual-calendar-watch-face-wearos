@@ -155,10 +155,14 @@ class AnalogWatchCanvasRenderer(
         }
 
         canvas.drawColor(backgroundColor)
-        displayTime(canvas, bounds, zonedDateTime)
-        displayDate(canvas, bounds, zonedDateTime)
-        displayCalendarInfo(canvas, bounds)
-        displayProgressBar(canvas, bounds, percentage)
+        this.displayWatchFaceElements(canvas, bounds, zonedDateTime, percentage)
+    }
+
+    private fun displayWatchFaceElements(canvas: Canvas, bounds: Rect, zonedDateTime: ZonedDateTime, percentage: Float){
+        this.displayProgressBar(canvas, bounds, percentage)
+        this.displayCalendarInfo(canvas, bounds)
+        this.displayTime(canvas, bounds, zonedDateTime)
+        this.displayDate(canvas, bounds, zonedDateTime)
     }
 
     private fun displayProgressBar(canvas: Canvas, bounds: Rect, percentage: Float){
@@ -175,8 +179,6 @@ class AnalogWatchCanvasRenderer(
         progressBounds.top = progressBounds.top + 25F/2F
         return progressBounds
     }
-
-
 
     private fun displayCalendarInfo(canvas: Canvas, bounds: Rect){
         canvas.drawText(this.calendar.emoji, bounds.exactCenterX() - 60 , bounds.exactCenterY() + 60, textPaint)

@@ -29,9 +29,7 @@ class GsonRequest<T>(
             Response.success(
                 gson.fromJson(json, clazz),
                 HttpHeaderParser.parseCacheHeaders(response))
-        } catch (e: UnsupportedEncodingException) {
-            Response.error(ParseError(e))
-        } catch (e: JsonSyntaxException) {
+        } catch (e: Exception) {
             Response.error(ParseError(e))
         }
     }
