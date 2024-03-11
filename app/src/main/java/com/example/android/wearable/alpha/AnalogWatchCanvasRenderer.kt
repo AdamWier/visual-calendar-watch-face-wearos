@@ -175,6 +175,7 @@ class AnalogWatchCanvasRenderer(
         this.displayProgressBar(canvas, bounds, percentage)
         this.displayEmoji(canvas, bounds)
         this.displaySummaryText(canvas, bounds)
+        this.displayEndText(canvas, bounds)
         this.displayTime(canvas, bounds, zonedDateTime)
         this.displayDate(canvas, bounds, zonedDateTime)
     }
@@ -200,6 +201,14 @@ class AnalogWatchCanvasRenderer(
         val height = bounds.exactCenterY() + textBounds.exactCenterX() / 2
         canvas.drawText(this.calendar.emoji, width, height, emojiPaint)
     }
+
+    private fun displayEndText(canvas: Canvas, bounds: Rect){
+        val textBounds = this.getTextBounds(this.calendar.endText, textPaint)
+        val width = this.getCenterXCoordinate(bounds, textBounds)
+        val height = bounds.bottom - textBounds.height() - this.progressBarStrokeWidth * 2
+        canvas.drawText(this.calendar.endText, width, height, textPaint)
+    }
+
     private fun displaySummaryText(canvas: Canvas, bounds: Rect){
         val textBounds = this.getTextBounds(this.calendar.summaryText, textPaint)
         val width = this.getCenterXCoordinate(bounds, textBounds)

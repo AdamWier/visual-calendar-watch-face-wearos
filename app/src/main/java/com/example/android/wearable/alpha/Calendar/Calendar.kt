@@ -13,6 +13,7 @@ import com.google.gson.JsonObject
 import com.vdurmont.emoji.EmojiParser
 import java.time.Duration
 import java.time.ZonedDateTime
+import java.time.format.DateTimeFormatter
 
 class Calendar(applicationContext: Context, private val notificationCreator: NotificationCreator, private val scheduler: Scheduler) {
     private val apiKey = applicationContext.getString(R.string.CALENDAR_API_KEY)
@@ -22,8 +23,17 @@ class Calendar(applicationContext: Context, private val notificationCreator: Not
     private val eventList: MutableList<JsonObject> = mutableListOf()
     var emoji: String = ""
     var summaryText: String = ""
+    var endText: String = ""
     private val currentEvent get() = this.eventList.find { it.get("start")
         .asJsonObject.get("dateTime") != null } ?: null
+
+    private fun getEndText(){
+        if(this.currentEvent == null) return
+        val timeFormatter = DateTimeFormatter.ofPattern("H:mm")
+        val endDateTime = getZonedDateTime(this.currentEvent!!.get("end").asJsonObject)
+        val text = endDateTime.format(timeFormatter)
+        this.endText = "Finishes @ $text"
+    }
 
     fun getPercentage (zonedDateTime: ZonedDateTime): Float {
             if(this.currentEvent == null) return 0F
@@ -63,6 +73,7 @@ class Calendar(applicationContext: Context, private val notificationCreator: Not
                 this.scheduler.cancelAllTasks()
                 this.eventList.addAll(it)
                 this.separateEmojiFromSummary()
+                this.getEndText()
                 val notificationTasks = this.notificationCreator.createNotificationTasks(this.currentEvent)
                 notificationTasks.forEach(this.scheduler::scheduleTask)
             },
