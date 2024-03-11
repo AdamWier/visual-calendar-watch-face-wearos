@@ -87,7 +87,7 @@ class AnalogWatchCanvasRenderer(
 
     private val textPaint = Paint().apply {
         isAntiAlias = true
-        textSize = context.resources.getDimensionPixelSize(R.dimen.hour_mark_size).toFloat()
+        textSize = 40.toFloat()
         color = Color.WHITE
     }
 
@@ -160,7 +160,8 @@ class AnalogWatchCanvasRenderer(
 
     private fun displayWatchFaceElements(canvas: Canvas, bounds: Rect, zonedDateTime: ZonedDateTime, percentage: Float){
         this.displayProgressBar(canvas, bounds, percentage)
-        this.displayCalendarInfo(canvas, bounds)
+        this.displayEmoji(canvas, bounds)
+        this.displaySummaryText(canvas, bounds)
         this.displayTime(canvas, bounds, zonedDateTime)
         this.displayDate(canvas, bounds, zonedDateTime)
     }
@@ -180,21 +181,42 @@ class AnalogWatchCanvasRenderer(
         return progressBounds
     }
 
-    private fun displayCalendarInfo(canvas: Canvas, bounds: Rect){
-        canvas.drawText(this.calendar.emoji, bounds.exactCenterX() - 60 , bounds.exactCenterY() + 60, textPaint)
-        canvas.drawText(this.calendar.summaryText, bounds.exactCenterX() - 40 , bounds.exactCenterY() + 40, textPaint)
+    private fun displayEmoji(canvas: Canvas, bounds: Rect){
+        val textBounds = this.getTextBounds(this.calendar.emoji)
+        val width = this.getCenterXCoordinate(bounds, textBounds)
+        canvas.drawText(this.calendar.emoji, width, bounds.exactCenterY() + 60, textPaint)
     }
+    private fun displaySummaryText(canvas: Canvas, bounds: Rect){
+        val textBounds = this.getTextBounds(this.calendar.summaryText)
+        val width = this.getCenterXCoordinate(bounds, textBounds)
+        canvas.drawText(this.calendar.summaryText, width, bounds.exactCenterY() + 40, textPaint)
+    }
+
 
     private fun displayDate(canvas: Canvas, bounds: Rect, zonedDateTime: ZonedDateTime){
         val timeFormatter = DateTimeFormatter.ofPattern("E, MMMM d")
-        val time = zonedDateTime.format(timeFormatter)
-        canvas.drawText(time, bounds.exactCenterX() + 20, bounds.exactCenterY() - 20, textPaint)
+        val date = zonedDateTime.format(timeFormatter)
+        val textBounds = this.getTextBounds(date)
+        val width = this.getCenterXCoordinate(bounds, textBounds)
+        canvas.drawText(date, width, bounds.exactCenterY() - 20, textPaint)
     }
 
     private fun displayTime(canvas: Canvas, bounds: Rect, zonedDateTime: ZonedDateTime){
         val timeFormatter = DateTimeFormatter.ofPattern("H:mm:s")
         val time = zonedDateTime.format(timeFormatter)
-        canvas.drawText(time, bounds.exactCenterX(), bounds.exactCenterY(), textPaint)
+        val textBounds = this.getTextBounds(time)
+        val width = this.getCenterXCoordinate(bounds, textBounds)
+        canvas.drawText(time, width, bounds.exactCenterY(), textPaint)
+    }
+
+    private fun getTextBounds(text: String): Rect{
+        val textBounds = Rect()
+        textPaint.getTextBounds(text, 0, text.length, textBounds)
+        return textBounds
+    }
+
+    private fun getCenterXCoordinate(bounds: Rect, textBounds: Rect): Float {
+        return bounds.exactCenterX() - textBounds.width() / 2
     }
 
     companion object {
