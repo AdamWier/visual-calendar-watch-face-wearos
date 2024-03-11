@@ -84,10 +84,23 @@ class AnalogWatchCanvasRenderer(
     )
 
     private val progressBarStrokeWidth = 25F
+    private val textPaintSize = 25F
 
     private val textPaint = Paint().apply {
         isAntiAlias = true
-        textSize = 40.toFloat()
+        textSize = textPaintSize
+        color = Color.WHITE
+    }
+
+    private val timePaint = Paint().apply {
+        isAntiAlias = true
+        textSize = 60.toFloat()
+        color = Color.WHITE
+    }
+
+    private val emojiPaint = Paint().apply {
+        isAntiAlias = true
+        textSize = 120.toFloat()
         color = Color.WHITE
     }
 
@@ -182,36 +195,41 @@ class AnalogWatchCanvasRenderer(
     }
 
     private fun displayEmoji(canvas: Canvas, bounds: Rect){
-        val textBounds = this.getTextBounds(this.calendar.emoji)
+        val textBounds = this.getTextBounds(this.calendar.emoji, emojiPaint)
         val width = this.getCenterXCoordinate(bounds, textBounds)
-        canvas.drawText(this.calendar.emoji, width, bounds.exactCenterY() + 60, textPaint)
+        val height = bounds.exactCenterY() + textBounds.exactCenterX() / 2
+        canvas.drawText(this.calendar.emoji, width, height, emojiPaint)
     }
     private fun displaySummaryText(canvas: Canvas, bounds: Rect){
-        val textBounds = this.getTextBounds(this.calendar.summaryText)
+        val textBounds = this.getTextBounds(this.calendar.summaryText, textPaint)
         val width = this.getCenterXCoordinate(bounds, textBounds)
-        canvas.drawText(this.calendar.summaryText, width, bounds.exactCenterY() + 40, textPaint)
+        val height = bounds.bottom - textBounds.height() - this.progressBarStrokeWidth
+        canvas.drawText(this.calendar.summaryText, width, height, textPaint)
     }
 
 
     private fun displayDate(canvas: Canvas, bounds: Rect, zonedDateTime: ZonedDateTime){
-        val timeFormatter = DateTimeFormatter.ofPattern("E, MMMM d")
-        val date = zonedDateTime.format(timeFormatter)
-        val textBounds = this.getTextBounds(date)
+        val timeFormatter = DateTimeFormatter.ofPattern("E, MMM d")
+        val dateText = zonedDateTime.format(timeFormatter)
+        val textBounds = this.getTextBounds(dateText, textPaint)
         val width = this.getCenterXCoordinate(bounds, textBounds)
-        canvas.drawText(date, width, bounds.exactCenterY() - 20, textPaint)
+        val height = bounds.top + textBounds.height() + this.progressBarStrokeWidth * 2
+        canvas.drawText(dateText, width, height, textPaint)
     }
 
     private fun displayTime(canvas: Canvas, bounds: Rect, zonedDateTime: ZonedDateTime){
-        val timeFormatter = DateTimeFormatter.ofPattern("H:mm:s")
+        val timeFormatter = DateTimeFormatter.ofPattern("H:mm")
         val time = zonedDateTime.format(timeFormatter)
-        val textBounds = this.getTextBounds(time)
+        val textBounds = this.getTextBounds(time, timePaint)
         val width = this.getCenterXCoordinate(bounds, textBounds)
-        canvas.drawText(time, width, bounds.exactCenterY(), textPaint)
+        val margin = 20F
+        val height = bounds.top + textBounds.height() + this.progressBarStrokeWidth * 2 + this.textPaintSize + margin
+        canvas.drawText(time, width, height, timePaint)
     }
 
-    private fun getTextBounds(text: String): Rect{
+    private fun getTextBounds(text: String, paint: Paint): Rect {
         val textBounds = Rect()
-        textPaint.getTextBounds(text, 0, text.length, textBounds)
+        paint.getTextBounds(text, 0, text.length, textBounds)
         return textBounds
     }
 
