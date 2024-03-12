@@ -62,7 +62,8 @@ class Calendar(applicationContext: Context, private val notificationCreator: Not
         if(requestInProgress) return
         requestInProgress = true
         this.emoji = "⏳"
-        this.summaryText = "LOADING"
+        this.summaryText = ""
+        this.endText = "LOADING"
         val request = GsonRequest(
             url = "https://us-central1-watch-ea9b9.cloudfunctions.net/mycalendar?KEY=${this.apiKey}",
             clazz = Array<JsonObject>::class.java,
