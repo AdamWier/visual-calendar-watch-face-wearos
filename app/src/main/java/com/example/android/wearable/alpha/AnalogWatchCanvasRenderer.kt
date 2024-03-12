@@ -25,12 +25,9 @@ import android.util.Log
 import android.view.SurfaceHolder
 import androidx.core.graphics.toRectF
 import androidx.wear.watchface.ComplicationSlotsManager
-import androidx.wear.watchface.DrawMode
 import androidx.wear.watchface.Renderer
 import androidx.wear.watchface.WatchState
 import androidx.wear.watchface.style.CurrentUserStyleRepository
-import com.example.android.wearable.alpha.data.watchface.WatchFaceColorPalette.Companion.convertToWatchFaceColorPalette
-import com.example.android.wearable.alpha.data.watchface.WatchFaceData
 import com.example.android.wearable.alpha.Calendar.Calendar
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
@@ -71,50 +68,37 @@ class AnalogWatchCanvasRenderer(
     private val scope: CoroutineScope =
         CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
 
-    // Represents all data needed to render the watch face. All value defaults are constants. Only
-    // three values are changeable by the user (color scheme, ticks being rendered, and length of
-    // the minute arm). Those dynamic values are saved in the watch face APIs and we update those
-    // here (in the renderer) through a Kotlin Flow.
-    private var watchFaceData: WatchFaceData = WatchFaceData()
-
-    private var watchFaceColors = convertToWatchFaceColorPalette(
-        context,
-        watchFaceData.activeColorStyle,
-        watchFaceData.ambientColorStyle
-    )
-
     private val progressBarStrokeWidth = 25F
     private val textPaintSize = 25F
 
     private val textPaint = Paint().apply {
         isAntiAlias = true
         textSize = textPaintSize
-        color = Color.WHITE
+        color = Color.parseColor("#EEEBDD")
     }
 
     private val timePaint = Paint().apply {
         isAntiAlias = true
         textSize = 60.toFloat()
-        color = Color.WHITE
+        color = Color.parseColor("#EEEBDD")
     }
 
     private val emojiPaint = Paint().apply {
         isAntiAlias = true
         textSize = 120.toFloat()
         color = Color.WHITE
-//        textAlign = Paint.Align.CENTER
     }
 
     private val circlePaint = Paint().apply {
         isAntiAlias = true
-        color = Color.WHITE
+        color = Color.parseColor("#F2F2F2")
         style = Paint.Style.STROKE
         strokeWidth = progressBarStrokeWidth
     }
 
     private val progressPaint = Paint().apply {
         isAntiAlias = true
-        color = Color.RED
+        color = Color.parseColor("#0aa1a4")
         style = Paint.Style.STROKE
         strokeWidth = progressBarStrokeWidth
     }
@@ -157,18 +141,12 @@ class AnalogWatchCanvasRenderer(
         zonedDateTime: ZonedDateTime,
         sharedAssets: AnalogSharedAssets
     ) {
-        val backgroundColor = if (renderParameters.drawMode == DrawMode.AMBIENT) {
-            watchFaceColors.ambientBackgroundColor
-        } else {
-            watchFaceColors.activeBackgroundColor
-        }
-
         val percentage = this.calendar.getPercentage(zonedDateTime)
         if (percentage >= 100) {
             this.calendar.getCalendarInfo()
         }
 
-        canvas.drawColor(backgroundColor)
+        canvas.drawColor(Color.parseColor("#000000"))
         this.displayWatchFaceElements(canvas, bounds, zonedDateTime, percentage)
     }
 
