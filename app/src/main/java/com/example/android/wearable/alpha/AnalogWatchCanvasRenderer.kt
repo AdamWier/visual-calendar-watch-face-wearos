@@ -102,6 +102,7 @@ class AnalogWatchCanvasRenderer(
         isAntiAlias = true
         textSize = 120.toFloat()
         color = Color.WHITE
+//        textAlign = Paint.Align.CENTER
     }
 
     private val circlePaint = Paint().apply {
@@ -196,9 +197,8 @@ class AnalogWatchCanvasRenderer(
     }
 
     private fun displayEmoji(canvas: Canvas, bounds: Rect){
-        val textBounds = this.getTextBounds(this.calendar.emoji, emojiPaint)
-        val width = this.getCenterXCoordinate(bounds, textBounds)
-        val height = bounds.exactCenterY() + textBounds.exactCenterX() / 2
+        val width = bounds.exactCenterX() - 70
+        val height = bounds.exactCenterY() + 40
         canvas.drawText(this.calendar.emoji, width, height, emojiPaint)
     }
 
@@ -212,7 +212,7 @@ class AnalogWatchCanvasRenderer(
     private fun displaySummaryText(canvas: Canvas, bounds: Rect){
         val textBounds = this.getTextBounds(this.calendar.summaryText, textPaint)
         val width = this.getCenterXCoordinate(bounds, textBounds)
-        val height = bounds.bottom - textBounds.height() - this.progressBarStrokeWidth
+        val height = bounds.bottom - textBounds.height() - this.progressBarStrokeWidth * 2 - this.textPaintSize - 20F
         canvas.drawText(this.calendar.summaryText, width, height, textPaint)
     }
 
