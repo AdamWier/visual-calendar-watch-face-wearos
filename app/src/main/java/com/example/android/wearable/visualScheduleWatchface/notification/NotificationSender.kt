@@ -1,4 +1,4 @@
-package com.example.android.wearable.alpha.notification
+package com.example.android.wearable.visualScheduleWatchface.notification
 
 import android.app.NotificationChannel
 import android.app.NotificationManager

@@ -1,4 +1,4 @@
-package com.example.android.wearable.alpha.Calendar
+package com.example.android.wearable.visualScheduleWatchface.Calendar
 
 import com.android.volley.NetworkResponse
 import com.android.volley.ParseError
@@ -6,8 +6,6 @@ import com.android.volley.Request
 import com.android.volley.Response
 import com.android.volley.toolbox.HttpHeaderParser
 import com.google.gson.Gson
-import com.google.gson.JsonSyntaxException
-import java.io.UnsupportedEncodingException
 import java.nio.charset.Charset
 
 class GsonRequest<T>(

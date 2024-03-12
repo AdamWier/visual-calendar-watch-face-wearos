@@ -1,4 +1,4 @@
-package com.example.android.wearable.alpha
+package com.example.android.wearable.visualScheduleWatchface
 
 import com.google.gson.JsonObject
 import java.time.LocalDateTime

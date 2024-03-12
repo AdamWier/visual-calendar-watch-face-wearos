@@ -22,10 +22,10 @@ plugins {
 android {
     compileSdk 34
 
-    namespace "com.example.android.wearable.alpha"
+    namespace "com.example.android.wearable.visualScheduleWatchface"
 
     defaultConfig {
-        applicationId "com.example.android.wearable.alpha"
+        applicationId "com.example.android.wearable.visualScheduleWatchface"
         minSdk 28
         targetSdk 33
         versionCode 1

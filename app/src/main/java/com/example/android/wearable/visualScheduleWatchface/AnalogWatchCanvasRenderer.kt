@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.example.android.wearable.alpha
+package com.example.android.wearable.visualScheduleWatchface
 
 import android.content.Context
 import android.graphics.Canvas
@@ -28,7 +28,7 @@ import androidx.wear.watchface.ComplicationSlotsManager
 import androidx.wear.watchface.Renderer
 import androidx.wear.watchface.WatchState
 import androidx.wear.watchface.style.CurrentUserStyleRepository
-import com.example.android.wearable.alpha.Calendar.Calendar
+import com.example.android.wearable.visualScheduleWatchface.Calendar.Calendar
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
 import kotlinx.coroutines.CoroutineScope

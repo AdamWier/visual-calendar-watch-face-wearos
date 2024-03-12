@@ -1,14 +1,13 @@
-package com.example.android.wearable.alpha.Calendar
+package com.example.android.wearable.visualScheduleWatchface.Calendar
 
 import android.content.Context
-import android.util.Log
 import com.android.volley.Request
 
 import com.android.volley.toolbox.Volley
-import com.example.android.wearable.alpha.R
-import com.example.android.wearable.alpha.getZonedDateTime
-import com.example.android.wearable.alpha.notification.NotificationCreator
-import com.example.android.wearable.alpha.scheduling.Scheduler
+import com.example.android.wearable.visualScheduleWatchface.R
+import com.example.android.wearable.visualScheduleWatchface.getZonedDateTime
+import com.example.android.wearable.visualScheduleWatchface.notification.NotificationCreator
+import com.example.android.wearable.visualScheduleWatchface.scheduling.Scheduler
 import com.google.gson.JsonObject
 import com.vdurmont.emoji.EmojiParser
 import java.time.Duration

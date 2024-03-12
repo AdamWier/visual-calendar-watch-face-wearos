@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.example.android.wearable.alpha
+package com.example.android.wearable.visualScheduleWatchface
 
 import android.view.SurfaceHolder
 import androidx.wear.watchface.CanvasType
@@ -23,9 +23,9 @@ import androidx.wear.watchface.WatchFaceService
 import androidx.wear.watchface.WatchFaceType
 import androidx.wear.watchface.WatchState
 import androidx.wear.watchface.style.CurrentUserStyleRepository
-import com.example.android.wearable.alpha.Calendar.Calendar
-import com.example.android.wearable.alpha.notification.NotificationCreator
-import com.example.android.wearable.alpha.scheduling.Scheduler
+import com.example.android.wearable.visualScheduleWatchface.Calendar.Calendar
+import com.example.android.wearable.visualScheduleWatchface.notification.NotificationCreator
+import com.example.android.wearable.visualScheduleWatchface.scheduling.Scheduler
 
 /**
  * Handles much of the boilerplate needed to implement a watch face (minus rendering code; see

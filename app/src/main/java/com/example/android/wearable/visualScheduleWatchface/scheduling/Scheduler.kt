@@ -1,4 +1,4 @@
-package com.example.android.wearable.alpha.scheduling
+package com.example.android.wearable.visualScheduleWatchface.scheduling
 
 import java.util.concurrent.Executors
 import java.util.concurrent.ScheduledFuture

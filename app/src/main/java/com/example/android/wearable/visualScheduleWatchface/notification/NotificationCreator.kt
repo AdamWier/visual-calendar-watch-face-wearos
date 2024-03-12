@@ -1,8 +1,8 @@
-package com.example.android.wearable.alpha.notification
+package com.example.android.wearable.visualScheduleWatchface.notification
 
 import android.content.Context
-import com.example.android.wearable.alpha.getZonedDateTime
-import com.example.android.wearable.alpha.scheduling.Task
+import com.example.android.wearable.visualScheduleWatchface.getZonedDateTime
+import com.example.android.wearable.visualScheduleWatchface.scheduling.Task
 import com.google.gson.JsonObject
 import java.time.Duration
 import java.time.ZonedDateTime
