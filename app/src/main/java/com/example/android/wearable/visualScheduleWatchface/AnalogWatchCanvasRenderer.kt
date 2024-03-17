@@ -15,7 +15,6 @@
  */
 package com.example.android.wearable.visualScheduleWatchface
 
-import android.content.Context
 import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
@@ -37,15 +36,9 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 
-// Default for how long each frame is displayed at expected frame rate.
-private const val FRAME_PERIOD_MS_DEFAULT: Long = 16L
+private const val FRAME_PERIOD_MS: Long = 256
 
-/**
- * Renders watch face via data in Room database. Also, updates watch face state based on setting
- * changes by user via [userStyleRepository.addUserStyleListener()].
- */
 class AnalogWatchCanvasRenderer(
-    private val context: Context,
     surfaceHolder: SurfaceHolder,
     watchState: WatchState,
     private val complicationSlotsManager: ComplicationSlotsManager,
@@ -57,7 +50,7 @@ class AnalogWatchCanvasRenderer(
     currentUserStyleRepository,
     watchState,
     canvasType,
-    FRAME_PERIOD_MS_DEFAULT,
+    FRAME_PERIOD_MS,
     clearWithBackgroundTintBeforeRenderingHighlightLayer = false
 ) {
     class AnalogSharedAssets : SharedAssets {
@@ -102,7 +95,6 @@ class AnalogWatchCanvasRenderer(
         style = Paint.Style.STROKE
         strokeWidth = progressBarStrokeWidth
     }
-
 
     init {
         scope.launch {
@@ -161,8 +153,8 @@ class AnalogWatchCanvasRenderer(
 
     private fun displayProgressBar(canvas: Canvas, bounds: Rect, percentage: Float){
         val radius = (bounds.width() / 2).toFloat() - this.progressBarStrokeWidth/2F
-        canvas.drawCircle(bounds.exactCenterX(), bounds.exactCenterY(), radius, circlePaint)
-        canvas.drawArc(getProgressBarBounds(bounds), 270F, 360 * (percentage / 100), false, progressPaint)
+        canvas.drawCircle(bounds.exactCenterX(), bounds.exactCenterY(), radius, this.circlePaint)
+        canvas.drawArc(this.getProgressBarBounds(bounds), 270F, 360 * (percentage / 100), false, progressPaint)
     }
 
     private fun getProgressBarBounds(bounds: Rect): RectF {

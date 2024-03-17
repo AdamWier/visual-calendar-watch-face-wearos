@@ -42,7 +42,6 @@ class AnalogWatchFaceService : WatchFaceService() {
         val calendar = Calendar(applicationContext, NotificationCreator(applicationContext), Scheduler())
 
         val renderer = AnalogWatchCanvasRenderer(
-            context = applicationContext,
             surfaceHolder = surfaceHolder,
             watchState = watchState,
             complicationSlotsManager = complicationSlotsManager,

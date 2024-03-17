@@ -43,7 +43,7 @@ class Calendar(applicationContext: Context, private val notificationCreator: Not
             val elapsedDuration = Duration.between(startDateTime, zonedDateTime)
             val percentageDecimal = elapsedDuration.seconds.toFloat() / eventDuration.seconds.toFloat()
 
-            return Math.max(percentageDecimal * 100, 0F)
+            return (percentageDecimal * 100).coerceAtLeast(0F)
     }
 
 
