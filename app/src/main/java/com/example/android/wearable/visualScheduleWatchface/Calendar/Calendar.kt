@@ -52,7 +52,7 @@ class Calendar(applicationContext: Context, private val notificationCreator: Not
             .asJsonObject.get("dateTime") != null }
             ?: return
         val summary = event.get("summary").asJsonPrimitive.asString
-        this.emoji = EmojiParser.extractEmojis(summary)[0] ?: ""
+        this.emoji = EmojiParser.extractEmojis(summary).getOrNull(index = 0) ?: "⬜"
         val summaryWithFirstEmojiRemoved = EmojiParser.parseToAliases(summary).replaceFirst(Regex(":(\\w|-)+:"), "")
         this.summaryText = EmojiParser.parseToUnicode(summaryWithFirstEmojiRemoved)
     }
@@ -79,7 +79,7 @@ class Calendar(applicationContext: Context, private val notificationCreator: Not
             },
             errorListener = {
                 this.emoji = "⚠"
-                this.summaryText = it.cause?.message ?: "ERROR"
+                this.summaryText = it.message ?: "ERROR"
                 requestInProgress = false
             })
         this.apiRequestQueue.add(request)
