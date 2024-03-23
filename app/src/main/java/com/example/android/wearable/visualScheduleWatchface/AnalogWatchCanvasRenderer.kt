@@ -27,7 +27,7 @@ import androidx.wear.watchface.ComplicationSlotsManager
 import androidx.wear.watchface.Renderer
 import androidx.wear.watchface.WatchState
 import androidx.wear.watchface.style.CurrentUserStyleRepository
-import com.example.android.wearable.visualScheduleWatchface.Calendar.Calendar
+import com.example.android.wearable.visualScheduleWatchface.calendar.Calendar
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
 import kotlinx.coroutines.CoroutineScope

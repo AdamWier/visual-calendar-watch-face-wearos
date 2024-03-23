@@ -5,7 +5,7 @@ import androidx.wear.watchface.ComplicationSlot
 import androidx.wear.watchface.TapEvent
 import androidx.wear.watchface.TapType
 import androidx.wear.watchface.WatchFace
-import com.example.android.wearable.visualScheduleWatchface.Calendar.Calendar
+import com.example.android.wearable.visualScheduleWatchface.calendar.Calendar
 
 class TapListener(private val calendar: Calendar): WatchFace.TapListener {
 

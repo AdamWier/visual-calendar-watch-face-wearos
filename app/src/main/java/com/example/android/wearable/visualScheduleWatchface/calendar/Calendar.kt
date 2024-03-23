@@ -1,4 +1,4 @@
-package com.example.android.wearable.visualScheduleWatchface.Calendar
+package com.example.android.wearable.visualScheduleWatchface.calendar
 
 import android.content.Context
 import com.android.volley.Request

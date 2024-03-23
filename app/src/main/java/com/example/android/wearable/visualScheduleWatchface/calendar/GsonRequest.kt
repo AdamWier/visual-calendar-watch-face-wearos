@@ -1,4 +1,4 @@
-package com.example.android.wearable.visualScheduleWatchface.Calendar
+package com.example.android.wearable.visualScheduleWatchface.calendar
 
 import com.android.volley.NetworkResponse
 import com.android.volley.ParseError

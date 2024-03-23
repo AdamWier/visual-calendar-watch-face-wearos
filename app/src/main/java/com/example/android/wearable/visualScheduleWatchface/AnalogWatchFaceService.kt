@@ -23,7 +23,7 @@ import androidx.wear.watchface.WatchFaceService
 import androidx.wear.watchface.WatchFaceType
 import androidx.wear.watchface.WatchState
 import androidx.wear.watchface.style.CurrentUserStyleRepository
-import com.example.android.wearable.visualScheduleWatchface.Calendar.Calendar
+import com.example.android.wearable.visualScheduleWatchface.calendar.Calendar
 import com.example.android.wearable.visualScheduleWatchface.notification.NotificationCreator
 import com.example.android.wearable.visualScheduleWatchface.scheduling.Scheduler
 
