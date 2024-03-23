@@ -167,6 +167,7 @@ class AnalogWatchCanvasRenderer(
     }
 
     private fun displayEmoji(canvas: Canvas, bounds: Rect){
+        // Emoji is not set relatively because the bounds function doesn't work correctly
         val width = bounds.exactCenterX() - 70
         val height = bounds.exactCenterY() + 40
         canvas.drawText(this.calendar.emoji, width, height, emojiPaint)
