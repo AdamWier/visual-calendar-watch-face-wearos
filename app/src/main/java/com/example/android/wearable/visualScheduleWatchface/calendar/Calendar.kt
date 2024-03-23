@@ -1,10 +1,7 @@
 package com.example.android.wearable.visualScheduleWatchface.calendar
 
-import android.content.Context
-import com.android.volley.Request
+import com.android.volley.VolleyError
 
-import com.android.volley.toolbox.Volley
-import com.example.android.wearable.visualScheduleWatchface.R
 import com.example.android.wearable.visualScheduleWatchface.getZonedDateTime
 import com.example.android.wearable.visualScheduleWatchface.notification.NotificationCreator
 import com.example.android.wearable.visualScheduleWatchface.scheduling.Scheduler
@@ -12,18 +9,14 @@ import com.google.gson.JsonObject
 import java.time.Duration
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
-import net.fellbaum.jemoji.Emoji
 import net.fellbaum.jemoji.EmojiManager
 
-class Calendar(applicationContext: Context, private val notificationCreator: NotificationCreator, private val scheduler: Scheduler) {
-    private val apiKey = applicationContext.getString(R.string.CALENDAR_API_KEY)
-    private val apiRequestQueue = Volley.newRequestQueue(applicationContext)
-    private var requestInProgress = false
-
+class Calendar(private val calendarRequest: CalendarRequester, private val notificationCreator: NotificationCreator, private val scheduler: Scheduler) {
     private val eventList: MutableList<JsonObject> = mutableListOf()
     var emoji: String = ""
     var summaryText: String = ""
     var endText: String = ""
+
     private val currentEvent get() = this.eventList.find { it.get("start")
         .asJsonObject.get("dateTime") != null } ?: null
 
@@ -59,30 +52,24 @@ class Calendar(applicationContext: Context, private val notificationCreator: Not
     }
 
     fun getCalendarInfo() {
-        if(requestInProgress) return
-        requestInProgress = true
         this.emoji = "⏳"
         this.summaryText = ""
         this.endText = "LOADING"
-        val request = GsonRequest(
-            url = "https://us-central1-watch-ea9b9.cloudfunctions.net/mycalendar?KEY=${this.apiKey}",
-            clazz = Array<JsonObject>::class.java,
-            method = Request.Method.GET,
-            listener = {
-                this.requestInProgress = false
-                this.eventList.clear()
-                this.scheduler.cancelAllTasks()
-                this.eventList.addAll(it)
-                this.separateEmojiFromSummary()
-                this.getEndText()
-                val notificationTasks = this.notificationCreator.createNotificationTasks(this.currentEvent)
-                notificationTasks.forEach(this.scheduler::scheduleTask)
-            },
-            errorListener = {
-                this.emoji = "⚠"
-                this.summaryText = it.message ?: "ERROR"
-                requestInProgress = false
-            })
-        this.apiRequestQueue.add(request)
+        this.calendarRequest.makeRequest(::onRequestSuccess, ::onRequestError)
+    }
+
+    private fun onRequestSuccess(responseContent: Array<JsonObject>){
+        this.eventList.clear()
+        this.scheduler.cancelAllTasks()
+        this.eventList.addAll(responseContent)
+        this.separateEmojiFromSummary()
+        this.getEndText()
+        val notificationTasks = this.notificationCreator.createNotificationTasks(this.currentEvent)
+        notificationTasks.forEach(this.scheduler::scheduleTask)
+    }
+
+    private fun onRequestError(error: VolleyError){
+        this.emoji = "⚠"
+        this.summaryText = error.message ?: "ERROR"
     }
 }

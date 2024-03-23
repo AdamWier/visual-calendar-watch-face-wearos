@@ -28,6 +28,7 @@ import androidx.wear.watchface.Renderer
 import androidx.wear.watchface.WatchState
 import androidx.wear.watchface.style.CurrentUserStyleRepository
 import com.example.android.wearable.visualScheduleWatchface.calendar.Calendar
+import com.example.android.wearable.visualScheduleWatchface.calendar.CalendarRequester
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
 import kotlinx.coroutines.CoroutineScope
@@ -36,7 +37,8 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 
-private const val FRAME_PERIOD_MS: Long = 256
+private const val SIXTY_FPS_FRAME_PERIOD_MS: Long = 256
+private const val BATTERY_SAVING_FRAME_PERIOD_MS: Long = 16
 
 class AnalogWatchCanvasRenderer(
     surfaceHolder: SurfaceHolder,
@@ -45,12 +47,13 @@ class AnalogWatchCanvasRenderer(
     currentUserStyleRepository: CurrentUserStyleRepository,
     canvasType: Int,
     private val calendar: Calendar,
+    private val calendarRequester: CalendarRequester
 ) : Renderer.CanvasRenderer2<AnalogWatchCanvasRenderer.AnalogSharedAssets>(
     surfaceHolder,
     currentUserStyleRepository,
     watchState,
     canvasType,
-    FRAME_PERIOD_MS,
+    BATTERY_SAVING_FRAME_PERIOD_MS,
     clearWithBackgroundTintBeforeRenderingHighlightLayer = false
 ) {
     class AnalogSharedAssets : SharedAssets {
@@ -137,6 +140,8 @@ class AnalogWatchCanvasRenderer(
         if (percentage >= 100) {
             this.calendar.getCalendarInfo()
         }
+
+        this.interactiveDrawModeUpdateDelayMillis = if(this.calendarRequester.requestInProgress) SIXTY_FPS_FRAME_PERIOD_MS else BATTERY_SAVING_FRAME_PERIOD_MS
 
         canvas.drawColor(Color.parseColor("#000000"))
         this.displayWatchFaceElements(canvas, bounds, zonedDateTime, percentage)

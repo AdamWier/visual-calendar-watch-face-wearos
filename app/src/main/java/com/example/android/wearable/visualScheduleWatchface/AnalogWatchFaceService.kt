@@ -24,6 +24,7 @@ import androidx.wear.watchface.WatchFaceType
 import androidx.wear.watchface.WatchState
 import androidx.wear.watchface.style.CurrentUserStyleRepository
 import com.example.android.wearable.visualScheduleWatchface.calendar.Calendar
+import com.example.android.wearable.visualScheduleWatchface.calendar.CalendarRequester
 import com.example.android.wearable.visualScheduleWatchface.notification.NotificationCreator
 import com.example.android.wearable.visualScheduleWatchface.scheduling.Scheduler
 
@@ -39,7 +40,8 @@ class AnalogWatchFaceService : WatchFaceService() {
         complicationSlotsManager: ComplicationSlotsManager,
         currentUserStyleRepository: CurrentUserStyleRepository
     ): WatchFace {
-        val calendar = Calendar(applicationContext, NotificationCreator(applicationContext), Scheduler())
+        val calendarRequester = CalendarRequester(applicationContext)
+        val calendar = Calendar(calendarRequester, NotificationCreator(applicationContext), Scheduler())
 
         val renderer = AnalogWatchCanvasRenderer(
             surfaceHolder = surfaceHolder,
@@ -47,7 +49,8 @@ class AnalogWatchFaceService : WatchFaceService() {
             complicationSlotsManager = complicationSlotsManager,
             currentUserStyleRepository = currentUserStyleRepository,
             canvasType = CanvasType.HARDWARE,
-            calendar = calendar
+            calendar = calendar,
+            calendarRequester = calendarRequester
         )
 
         return WatchFace(
