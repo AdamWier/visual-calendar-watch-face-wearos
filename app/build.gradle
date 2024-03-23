@@ -90,5 +90,5 @@ dependencies {
     implementation("com.android.volley:volley:1.2.1")
     implementation("com.google.code.gson:gson:2.10.1")
 
-    implementation('com.vdurmont:emoji-java:5.1.1')
+    implementation('net.fellbaum:jemoji:1.4.0')
 }

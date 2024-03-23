@@ -9,10 +9,11 @@ import com.example.android.wearable.visualScheduleWatchface.getZonedDateTime
 import com.example.android.wearable.visualScheduleWatchface.notification.NotificationCreator
 import com.example.android.wearable.visualScheduleWatchface.scheduling.Scheduler
 import com.google.gson.JsonObject
-import com.vdurmont.emoji.EmojiParser
 import java.time.Duration
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
+import net.fellbaum.jemoji.Emoji
+import net.fellbaum.jemoji.EmojiManager
 
 class Calendar(applicationContext: Context, private val notificationCreator: NotificationCreator, private val scheduler: Scheduler) {
     private val apiKey = applicationContext.getString(R.string.CALENDAR_API_KEY)
@@ -52,9 +53,9 @@ class Calendar(applicationContext: Context, private val notificationCreator: Not
             .asJsonObject.get("dateTime") != null }
             ?: return
         val summary = event.get("summary").asJsonPrimitive.asString
-        this.emoji = EmojiParser.extractEmojis(summary).getOrNull(index = 0) ?: "⬜"
-        val summaryWithFirstEmojiRemoved = EmojiParser.parseToAliases(summary).replaceFirst(Regex(":(\\w|-)+:"), "")
-        this.summaryText = EmojiParser.parseToUnicode(summaryWithFirstEmojiRemoved)
+        val emoji = EmojiManager.extractEmojis(summary).elementAtOrNull(0)
+        this.emoji = emoji?.emoji ?: "⬜"
+        this.summaryText = EmojiManager.removeEmojis(summary, emoji)
     }
 
     fun getCalendarInfo() {
