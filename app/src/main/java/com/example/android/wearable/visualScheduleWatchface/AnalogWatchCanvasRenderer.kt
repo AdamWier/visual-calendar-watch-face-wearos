@@ -164,10 +164,10 @@ class AnalogWatchCanvasRenderer(
 
     private fun getProgressBarBounds(bounds: Rect): RectF {
         val progressBounds = bounds.toRectF()
-        progressBounds.right = progressBounds.right - 25F/2F
-        progressBounds.left = progressBounds.left + 25F/2F
-        progressBounds.bottom = progressBounds.bottom - 25F/2F
-        progressBounds.top = progressBounds.top + 25F/2F
+        progressBounds.right = progressBounds.right - this.progressBarStrokeWidth/2F
+        progressBounds.left = progressBounds.left + this.progressBarStrokeWidth/2F
+        progressBounds.bottom = progressBounds.bottom - this.progressBarStrokeWidth/2F
+        progressBounds.top = progressBounds.top + this.progressBarStrokeWidth/2F
         return progressBounds
     }
 
