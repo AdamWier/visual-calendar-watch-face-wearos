@@ -26,7 +26,6 @@ import androidx.wear.watchface.style.CurrentUserStyleRepository
 import com.example.android.wearable.visualScheduleWatchface.calendar.Calendar
 import com.example.android.wearable.visualScheduleWatchface.calendar.CalendarRequester
 import com.example.android.wearable.visualScheduleWatchface.notification.NotificationCreator
-import com.example.android.wearable.visualScheduleWatchface.scheduling.Scheduler
 
 /**
  * Handles much of the boilerplate needed to implement a watch face (minus rendering code; see
@@ -41,7 +40,7 @@ class AnalogWatchFaceService : WatchFaceService() {
         currentUserStyleRepository: CurrentUserStyleRepository
     ): WatchFace {
         val calendarRequester = CalendarRequester(applicationContext)
-        val calendar = Calendar(calendarRequester, NotificationCreator(applicationContext), Scheduler())
+        val calendar = Calendar(calendarRequester, NotificationCreator(applicationContext))
 
         val renderer = AnalogWatchCanvasRenderer(
             surfaceHolder = surfaceHolder,

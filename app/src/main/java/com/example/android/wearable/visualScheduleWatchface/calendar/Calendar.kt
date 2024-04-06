@@ -4,14 +4,13 @@ import com.android.volley.VolleyError
 
 import com.example.android.wearable.visualScheduleWatchface.getZonedDateTime
 import com.example.android.wearable.visualScheduleWatchface.notification.NotificationCreator
-import com.example.android.wearable.visualScheduleWatchface.scheduling.Scheduler
 import com.google.gson.JsonObject
 import java.time.Duration
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
 import net.fellbaum.jemoji.EmojiManager
 
-class Calendar(private val calendarRequest: CalendarRequester, private val notificationCreator: NotificationCreator, private val scheduler: Scheduler) {
+class Calendar(private val calendarRequest: CalendarRequester, private val notificationCreator: NotificationCreator) {
     private val eventList: MutableList<JsonObject> = mutableListOf()
     var emoji: String = ""
     var summaryText: String = ""
@@ -55,17 +54,16 @@ class Calendar(private val calendarRequest: CalendarRequester, private val notif
         this.emoji = "⏳"
         this.summaryText = ""
         this.endText = "LOADING"
+        this.notificationCreator.clearNotificationAlarms()
         this.calendarRequest.makeRequest(::onRequestSuccess, ::onRequestError)
     }
 
     private fun onRequestSuccess(responseContent: Array<JsonObject>){
         this.eventList.clear()
-        this.scheduler.cancelAllTasks()
         this.eventList.addAll(responseContent)
         this.separateEmojiFromSummary()
         this.getEndText()
-        val notificationTasks = this.notificationCreator.createNotificationTasks(this.currentEvent)
-        notificationTasks.forEach(this.scheduler::scheduleTask)
+        this.notificationCreator.createNotifications(this.currentEvent)
     }
 
     private fun onRequestError(error: VolleyError){

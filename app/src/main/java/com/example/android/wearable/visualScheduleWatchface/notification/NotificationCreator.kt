@@ -1,14 +1,19 @@
 package com.example.android.wearable.visualScheduleWatchface.notification
 
+import android.app.AlarmManager
+import android.app.PendingIntent
 import android.content.Context
+import android.content.Intent
+import androidx.core.app.AlarmManagerCompat
 import com.example.android.wearable.visualScheduleWatchface.getZonedDateTime
-import com.example.android.wearable.visualScheduleWatchface.scheduling.Task
 import com.google.gson.JsonObject
 import java.time.Duration
 import java.time.ZonedDateTime
-import java.util.concurrent.TimeUnit
 
-class NotificationCreator(private val applicationContext: Context) {
+class NotificationCreator(private val context: Context) {
+    private val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
+    private val pendingIntents = mutableListOf<PendingIntent>()
+
     private val percentagesForNotifications: List<Notification> = listOf(
         Notification(50, "Halfway there!"),
         Notification(75, "Three quarters!"),
@@ -26,32 +31,48 @@ class NotificationCreator(private val applicationContext: Context) {
         return startDateTime.plus(eventDurationAtPercentage)
     }
 
-    private fun getSecondsFromNow(time: ZonedDateTime?): Long {
+    private fun getSecondsFromNow(notification: Notification, currentEvent: JsonObject): Long {
+        val timeAtPercentage = this.getTimeAtPercentage(notification.percentage, currentEvent)
+
         val now = ZonedDateTime.now()
-        return Duration.between(now, time).toMillis()
+        return Duration.between(now, timeAtPercentage).toMillis()
     }
 
-    private fun createNotificationTask(notification: Notification, currentEvent: JsonObject): Task? {
-        val timeAtPercentage = this.getTimeAtPercentage(notification.percentage, currentEvent)
-        val secondsFromNow = this.getSecondsFromNow(timeAtPercentage)
-        if(secondsFromNow <= 0) {
-            return null
-        }
-        return Task(
-            NotificationSender(applicationContext, notification.message),
-            secondsFromNow,
-            TimeUnit.MILLISECONDS
+    private fun createNotificationPendingIntent(notification: Notification): PendingIntent {
+        val intent = Intent(context, NotificationReceiver::class.java)
+        intent.putExtra("message", notification.message)
+
+        return PendingIntent.getBroadcast(
+            context,
+            notification.percentage.toInt(),
+            intent,
+            PendingIntent.FLAG_IMMUTABLE
         )
     }
 
-    fun createNotificationTasks(currentEvent: JsonObject?): List<Task>{
-        if(currentEvent == null) return listOf()
+    fun clearNotificationAlarms(){
+        this.pendingIntents.forEach{
+            alarmManager.cancel(it)
+        }
+        this.pendingIntents.clear()
+    }
 
-        return this.percentagesForNotifications.mapNotNull {
-            this.createNotificationTask(
-                it,
-                currentEvent
+    fun createNotifications(currentEvent: JsonObject?){
+        if(currentEvent == null) return
+
+        return this.percentagesForNotifications.forEach{
+            val secondsFromNow = this.getSecondsFromNow(it, currentEvent)
+            if(secondsFromNow <= 0) {
+                return
+            }
+            val pendingIntent = this.createNotificationPendingIntent(it)
+            AlarmManagerCompat.setExactAndAllowWhileIdle(
+                alarmManager,
+                AlarmManager.RTC_WAKEUP,
+                System.currentTimeMillis() + secondsFromNow,
+                pendingIntent
             )
+            this.pendingIntents.add(pendingIntent)
         }
     }
 }
