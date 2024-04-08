@@ -26,7 +26,7 @@ import androidx.core.content.ContextCompat
 
 class NotificationReceiver: BroadcastReceiver() {
     private val wearableExtender = NotificationCompat.WearableExtender()
-    private val channel = NotificationChannel("percentage", "Watch Percentage Notification", NotificationManager.IMPORTANCE_DEFAULT)
+    private val channel = NotificationChannel("percentage", "Watch Percentage Notification", NotificationManager.IMPORTANCE_HIGH)
 
     override fun onReceive(context: Context, intent: Intent) {
         val notificationManager = ContextCompat.getSystemService(
