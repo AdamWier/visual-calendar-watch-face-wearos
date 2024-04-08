@@ -73,7 +73,6 @@
 
         <receiver
             android:name=".notification.NotificationReceiver"
-            android:enabled="true"
             android:exported="false">
         </receiver>
 

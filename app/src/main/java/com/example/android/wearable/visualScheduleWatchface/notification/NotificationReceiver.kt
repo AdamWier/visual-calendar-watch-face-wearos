@@ -33,6 +33,7 @@ class NotificationReceiver: BroadcastReceiver() {
             context,
             NotificationManager::class.java
         ) as NotificationManager
+        notificationManager.createNotificationChannel(this.channel)
 
         val notificationBuilder = NotificationCompat.Builder(
             context,
@@ -40,8 +41,9 @@ class NotificationReceiver: BroadcastReceiver() {
         ).setSmallIcon(android.R.drawable.alert_dark_frame)
             .setContentTitle(intent.getStringExtra("message"))
             .extend(this.wearableExtender)
+            .build()
 
-        notificationManager?.notify(1, notificationBuilder.build())
+        notificationManager.notify(1, notificationBuilder)
 
 
     }

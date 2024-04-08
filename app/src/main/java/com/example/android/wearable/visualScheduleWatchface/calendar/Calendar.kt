@@ -54,7 +54,8 @@ class Calendar(private val calendarRequest: CalendarRequester, private val notif
         this.emoji = "⏳"
         this.summaryText = ""
         this.endText = "LOADING"
-        this.notificationCreator.clearNotificationAlarms()
+//        Disabled for now because removes last notification
+//        this.notificationCreator.clearNotificationAlarms()
         this.calendarRequest.makeRequest(::onRequestSuccess, ::onRequestError)
     }
 
