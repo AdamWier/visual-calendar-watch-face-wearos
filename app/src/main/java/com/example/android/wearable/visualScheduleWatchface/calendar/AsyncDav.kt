@@ -29,6 +29,8 @@ import java.io.EOFException
 import java.io.Reader
 import java.io.StringWriter
 import java.text.SimpleDateFormat
+import java.time.ZonedDateTime
+import java.time.format.DateTimeFormatter
 import java.util.Locale
 import okhttp3.HttpUrl.Companion.toHttpUrl
 import okhttp3.OkHttpClient
@@ -39,6 +41,7 @@ import org.xmlpull.v1.XmlPullParser
 import org.xmlpull.v1.XmlPullParserException
 
 class AsyncDav() : AsyncTask<Context, Unit, Unit>() {
+    private var events = mutableListOf<EventItem>();
 
     override fun doInBackground(vararg applicationContext: Context) {
         try {
@@ -85,6 +88,7 @@ class AsyncDav() : AsyncTask<Context, Unit, Unit>() {
                 }
             }
             serializer.endDocument()
+            var events = mutableListOf<EventItem>();
 val callback: (Response, Response.HrefRelation) -> Unit = { response: Response, relation: Response.HrefRelation ->
 
     Log.d("caldav", response.properties.get(0).toString())
@@ -93,6 +97,12 @@ val callback: (Response, Response.HrefRelation) -> Unit = { response: Response, 
         it.split(":")
     }.map { it.get(0) to it.get(1) }.associate { it }
 Log.d("caldav2", splits.get("SUMMARY")!!);
+    val combined1 = splits.get("DTSTART") + splits.get("X-WR-Timezone")
+    val combined2 = splits.get("DTSTART") + splits.get("X-WR-Timezone")
+    val pattern = DateTimeFormatter.ofPattern("yyyyMMdd'T'HHmmss'Z' z");
+    val start = ZonedDateTime.parse( combined1, pattern)
+    val end = ZonedDateTime.parse( combined2, pattern)
+    events.add(EventItem(start =  start, end = end, summary = splits.get("SUMMARY")!!))
 
 }
             val location = "https://posteo.de:8443/calendars/wier.adam/default/"
@@ -153,6 +163,11 @@ Log.d("caldav2", splits.get("SUMMARY")!!);
         } catch (e: XmlPullParserException) {
             throw DavException("Couldn't parse multistatus XML element", e)
         }
+    }
+
+    override fun onPostExecute(result: Unit?) {
+        super.onPostExecute(result)
+        Log.d("CALDAVRESULT", events.toString())
     }
 
 
