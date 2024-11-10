@@ -27,8 +27,8 @@ import androidx.wear.watchface.ComplicationSlotsManager
 import androidx.wear.watchface.Renderer
 import androidx.wear.watchface.WatchState
 import androidx.wear.watchface.style.CurrentUserStyleRepository
+import com.example.android.wearable.visualScheduleWatchface.calendar.AsyncDav
 import com.example.android.wearable.visualScheduleWatchface.calendar.Calendar
-import com.example.android.wearable.visualScheduleWatchface.calendar.CalendarRequester
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
 import kotlinx.coroutines.CoroutineScope
@@ -47,7 +47,6 @@ class AnalogWatchCanvasRenderer(
     currentUserStyleRepository: CurrentUserStyleRepository,
     canvasType: Int,
     private val calendar: Calendar,
-    private val calendarRequester: CalendarRequester
 ) : Renderer.CanvasRenderer2<AnalogWatchCanvasRenderer.AnalogSharedAssets>(
     surfaceHolder,
     currentUserStyleRepository,
@@ -141,7 +140,7 @@ class AnalogWatchCanvasRenderer(
             this.calendar.getCalendarInfo()
         }
 
-        this.interactiveDrawModeUpdateDelayMillis = if(this.calendarRequester.requestInProgress) SIXTY_FPS_FRAME_PERIOD_MS else BATTERY_SAVING_FRAME_PERIOD_MS
+        this.interactiveDrawModeUpdateDelayMillis = if(this.calendar.requestInProgress) SIXTY_FPS_FRAME_PERIOD_MS else BATTERY_SAVING_FRAME_PERIOD_MS
 
         canvas.drawColor(Color.parseColor("#000000"))
         this.displayWatchFaceElements(canvas, bounds, zonedDateTime, percentage)

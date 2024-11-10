@@ -1,5 +1,6 @@
 package com.example.android.wearable.visualScheduleWatchface.calendar
 
+import android.content.Context
 import com.android.volley.VolleyError
 
 import com.example.android.wearable.visualScheduleWatchface.getZonedDateTime
@@ -10,7 +11,9 @@ import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
 import net.fellbaum.jemoji.EmojiManager
 
-class Calendar(private val calendarRequest: CalendarRequester, private val notificationCreator: NotificationCreator) {
+class Calendar(private val applicationContext: Context, private val notificationCreator: NotificationCreator) {
+    var requestInProgress = false
+        private set
     private val eventList: MutableList<JsonObject> = mutableListOf()
     var emoji: String = ""
     var summaryText: String = ""
@@ -56,10 +59,13 @@ class Calendar(private val calendarRequest: CalendarRequester, private val notif
         this.endText = "LOADING"
 //        Disabled for now because removes last notification
 //        this.notificationCreator.clearNotificationAlarms()
-        this.calendarRequest.makeRequest(::onRequestSuccess, ::onRequestError)
+        //this.calendarRequest.makeRequest(::onRequestSuccess, ::onRequestError)
+        this.requestInProgress = true;
+        AsyncDav(applicationContext).execute()
     }
 
     private fun onRequestSuccess(responseContent: Array<JsonObject>){
+        this.requestInProgress = false
         this.eventList.clear()
         this.eventList.addAll(responseContent)
         this.separateEmojiFromSummary()
@@ -68,6 +74,7 @@ class Calendar(private val calendarRequest: CalendarRequester, private val notif
     }
 
     private fun onRequestError(error: VolleyError){
+        this.requestInProgress = false
         this.emoji = "⚠"
         this.summaryText = error.message ?: "ERROR"
     }

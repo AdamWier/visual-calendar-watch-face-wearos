@@ -4,7 +4,6 @@ import android.content.Context
 import android.os.AsyncTask
 import android.util.Log
 import at.bitfire.dav4jvm.BasicDigestAuthHandler
-import at.bitfire.dav4jvm.DavCalendar
 import at.bitfire.dav4jvm.DavCalendar.Companion.CALENDAR_QUERY
 import at.bitfire.dav4jvm.DavCalendar.Companion.COMP_FILTER
 import at.bitfire.dav4jvm.DavCalendar.Companion.COMP_FILTER_NAME
@@ -28,6 +27,7 @@ import com.example.android.wearable.visualScheduleWatchface.R
 import java.io.EOFException
 import java.io.Reader
 import java.io.StringWriter
+import java.sql.Date
 import java.text.SimpleDateFormat
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
@@ -36,90 +36,52 @@ import okhttp3.HttpUrl.Companion.toHttpUrl
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
-import okio.IOException
 import org.xmlpull.v1.XmlPullParser
 import org.xmlpull.v1.XmlPullParserException
 
-class AsyncDav() : AsyncTask<Context, Unit, Unit>() {
+class AsyncDav(private var applicationContext: Context) : AsyncTask<Unit, Unit, Unit>() {
     private var events = mutableListOf<EventItem>();
 
-    override fun doInBackground(vararg applicationContext: Context) {
-        try {
-            val authHandler = BasicDigestAuthHandler(
-                domain = "posteo.de", // Optional, to only authenticate against hosts with this domain.
-                username = "wier.adam@posteo.com",
-                password = applicationContext.get(0).getString(R.string.posteo_password)
-            )
-            val httpClient = OkHttpClient.Builder()
-                .followRedirects(false)
-                .authenticator(authHandler)
-                .addNetworkInterceptor(authHandler)
-                .build()
+    private val authHandler = BasicDigestAuthHandler(
+        domain = "posteo.de", // Optional, to only authenticate against hosts with this domain.
+        username = "wier.adam@posteo.com",
+        password = applicationContext.getString(R.string.posteo_password)
+    )
 
-            val start = null
-            val end = null
+    private val httpClient = OkHttpClient.Builder()
+        .followRedirects(false)
+        .authenticator(authHandler)
+        .addNetworkInterceptor(authHandler)
+        .build()
 
-            val serializer = XmlUtils.newSerializer()
-            val writer = StringWriter()
-            serializer.setOutput(writer)
-            serializer.startDocument("UTF-8", null)
-            serializer.setPrefix("", XmlUtils.NS_WEBDAV)
-            serializer.setPrefix("CAL", XmlUtils.NS_CALDAV)
-            serializer.insertTag(CALENDAR_QUERY) {
-                insertTag(PROP) {
-                    insertTag(GetETag.NAME)
-                    insertTag(CalendarData.NAME)
-                }
-                insertTag(FILTER) {
-                    insertTag(COMP_FILTER) {
-                        attribute(null, COMP_FILTER_NAME, "VCALENDAR")
-                        insertTag(COMP_FILTER) {
-                            attribute(null, COMP_FILTER_NAME, "VEVENT")
-                            if (start != null || end != null) {
-                                insertTag(TIME_RANGE) {
-                                    if (start != null)
-                                        attribute(null, TIME_RANGE_START, SimpleDateFormat("yyyyMMdd'T'HHmmss'Z'", Locale.ROOT).format(start))
-                                    if (end != null)
-                                        attribute(null, TIME_RANGE_END, SimpleDateFormat("yyyyMMdd'T'HHmmss'Z'", Locale.ROOT).format(end))
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-            serializer.endDocument()
-            var events = mutableListOf<EventItem>();
-val callback: (Response, Response.HrefRelation) -> Unit = { response: Response, relation: Response.HrefRelation ->
+    private val location = "https://posteo.de:8443/calendars/wier.adam/default/"
 
-    Log.d("caldav", response.properties.get(0).toString())
-    val calendarData = response.properties.get(0) as CalendarData
-    val splits = calendarData.iCalendar.toString().lines().map {
-        it.split(":")
-    }.map { it.get(0) to it.get(1) }.associate { it }
-Log.d("caldav2", splits.get("SUMMARY")!!);
-    val combined1 = splits.get("DTSTART") + splits.get("X-WR-Timezone")
-    val combined2 = splits.get("DTSTART") + splits.get("X-WR-Timezone")
-    val pattern = DateTimeFormatter.ofPattern("yyyyMMdd'T'HHmmss'Z' z");
-    val start = ZonedDateTime.parse( combined1, pattern)
-    val end = ZonedDateTime.parse( combined2, pattern)
-    events.add(EventItem(start =  start, end = end, summary = splits.get("SUMMARY")!!))
+    override fun doInBackground(vararg params: Unit) {
+        val request = this.preapreRequest(null, null);
+        val response = httpClient.newCall(
+            Request.Builder()
+            .url(location)
+            .method("REPORT", request.toRequestBody(MIME_XML))
+            .header("Depth", "1")
+            .build()).execute();
 
-}
-            val location = "https://posteo.de:8443/calendars/wier.adam/default/"
-
-                val result = httpClient.newCall(
-                    Request.Builder()
-                    .url(location)
-                    .method("REPORT", writer.toString().toRequestBody(MIME_XML))
-                    .header("Depth", "1")
-                    .build()).execute()
-                val result2 = processMultiStatus(result.body!!.charStream(), location, callback)
-    }catch (e: IOException) {
-        Log.d("CALDAV", e.toString())
-    }
+        processMultiStatus(response.body!!.charStream(), location, ::responseCallback)
     }
 
-    protected fun processMultiStatus(reader: Reader, location: String, callback: MultiResponseCallback): List<Property> {
+    private fun responseCallback(response: Response, relation: Response.HrefRelation): Unit{
+        val calendarData = response.properties.get(0) as CalendarData
+        val splits = calendarData.iCalendar.toString().lines().map {
+            it.split(":")
+        }.map { it.get(0) to it.get(1) }.associate { it }
+        val combined1 = splits.get("DTSTART") + splits.get("X-WR-Timezone")
+        val combined2 = splits.get("DTSTART") + splits.get("X-WR-Timezone")
+        val pattern = DateTimeFormatter.ofPattern("yyyyMMdd'T'HHmmss'Z' z");
+        val start = ZonedDateTime.parse( combined1, pattern)
+        val end = ZonedDateTime.parse( combined2, pattern)
+        events.add(EventItem(start =  start, end = end, summary = splits.get("SUMMARY")!!))
+    }
+
+    private fun processMultiStatus(reader: Reader, location: String, callback: MultiResponseCallback): List<Property> {
         val responseProperties = mutableListOf<Property>()
         val parser = XmlUtils.newPullParser()
 
@@ -166,9 +128,40 @@ Log.d("caldav2", splits.get("SUMMARY")!!);
     }
 
     override fun onPostExecute(result: Unit?) {
-        super.onPostExecute(result)
         Log.d("CALDAVRESULT", events.toString())
     }
 
+    private fun preapreRequest(start: Date?, end: Date?): String {
+        val serializer = XmlUtils.newSerializer()
+        val writer = StringWriter()
+        serializer.setOutput(writer)
+        serializer.startDocument("UTF-8", null)
+        serializer.setPrefix("", XmlUtils.NS_WEBDAV)
+        serializer.setPrefix("CAL", XmlUtils.NS_CALDAV)
+        serializer.insertTag(CALENDAR_QUERY) {
+            insertTag(PROP) {
+                insertTag(GetETag.NAME)
+                insertTag(CalendarData.NAME)
+            }
+            insertTag(FILTER) {
+                insertTag(COMP_FILTER) {
+                    attribute(null, COMP_FILTER_NAME, "VCALENDAR")
+                    insertTag(COMP_FILTER) {
+                        attribute(null, COMP_FILTER_NAME, "VEVENT")
+                        if (start != null || end != null) {
+                            insertTag(TIME_RANGE) {
+                                if (start != null)
+                                    attribute(null, TIME_RANGE_START, SimpleDateFormat("yyyyMMdd'T'HHmmss'Z'", Locale.ROOT).format(start))
+                                if (end != null)
+                                    attribute(null, TIME_RANGE_END, SimpleDateFormat("yyyyMMdd'T'HHmmss'Z'", Locale.ROOT).format(end))
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        serializer.endDocument()
+        return writer.toString()
+    }
 
 }
