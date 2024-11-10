@@ -27,10 +27,13 @@ import com.example.android.wearable.visualScheduleWatchface.R
 import java.io.EOFException
 import java.io.Reader
 import java.io.StringWriter
-import java.sql.Date
 import java.text.SimpleDateFormat
+import java.time.Duration
+import java.time.Instant
+import java.time.ZoneId
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
+import java.util.Date
 import java.util.Locale
 import okhttp3.HttpUrl.Companion.toHttpUrl
 import okhttp3.OkHttpClient
@@ -39,7 +42,7 @@ import okhttp3.RequestBody.Companion.toRequestBody
 import org.xmlpull.v1.XmlPullParser
 import org.xmlpull.v1.XmlPullParserException
 
-class AsyncDav(private var applicationContext: Context) : AsyncTask<Unit, Unit, Unit>() {
+class AsyncDav(applicationContext: Context) : AsyncTask<(Array<EventItem>) -> Unit, Unit, (Array<EventItem>) -> Unit>() {
     private var events = mutableListOf<EventItem>();
 
     private val authHandler = BasicDigestAuthHandler(
@@ -56,8 +59,8 @@ class AsyncDav(private var applicationContext: Context) : AsyncTask<Unit, Unit, 
 
     private val location = "https://posteo.de:8443/calendars/wier.adam/default/"
 
-    override fun doInBackground(vararg params: Unit) {
-        val request = this.preapreRequest(null, null);
+    override fun doInBackground(vararg params: (Array<EventItem>) -> Unit ): (Array<EventItem>) -> Unit{
+        val request = this.preapreRequest(Date.from(Instant.now().minus(Duration.ofDays(1))), Date.from(Instant.now().plus(Duration.ofDays(1))));
         val response = httpClient.newCall(
             Request.Builder()
             .url(location)
@@ -66,6 +69,7 @@ class AsyncDav(private var applicationContext: Context) : AsyncTask<Unit, Unit, 
             .build()).execute();
 
         processMultiStatus(response.body!!.charStream(), location, ::responseCallback)
+        return params.get(0)
     }
 
     private fun responseCallback(response: Response, relation: Response.HrefRelation): Unit{
@@ -74,10 +78,11 @@ class AsyncDav(private var applicationContext: Context) : AsyncTask<Unit, Unit, 
             it.split(":")
         }.map { it.get(0) to it.get(1) }.associate { it }
         val combined1 = splits.get("DTSTART") + splits.get("X-WR-Timezone")
-        val combined2 = splits.get("DTSTART") + splits.get("X-WR-Timezone")
+        val combined2 = splits.get("DTEND") + splits.get("X-WR-Timezone")
         val pattern = DateTimeFormatter.ofPattern("yyyyMMdd'T'HHmmss'Z' z");
-        val start = ZonedDateTime.parse( combined1, pattern)
-        val end = ZonedDateTime.parse( combined2, pattern)
+        val start = ZonedDateTime.parse( combined1, pattern).withZoneSameInstant(ZoneId.systemDefault())
+        val end = ZonedDateTime.parse( combined2, pattern).withZoneSameInstant(ZoneId.systemDefault())
+
         events.add(EventItem(start =  start, end = end, summary = splits.get("SUMMARY")!!))
     }
 
@@ -127,11 +132,11 @@ class AsyncDav(private var applicationContext: Context) : AsyncTask<Unit, Unit, 
         }
     }
 
-    override fun onPostExecute(result: Unit?) {
-        Log.d("CALDAVRESULT", events.toString())
+    override fun onPostExecute(callback: (Array<EventItem>) -> Unit) {
+        callback(events.toTypedArray())
     }
 
-    private fun preapreRequest(start: Date?, end: Date?): String {
+    private fun preapreRequest(start: Date, end: Date): String {
         val serializer = XmlUtils.newSerializer()
         val writer = StringWriter()
         serializer.setOutput(writer)

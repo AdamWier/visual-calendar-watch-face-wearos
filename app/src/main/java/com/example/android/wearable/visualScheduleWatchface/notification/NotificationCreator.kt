@@ -5,8 +5,7 @@ import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import androidx.core.app.AlarmManagerCompat
-import com.example.android.wearable.visualScheduleWatchface.getZonedDateTime
-import com.google.gson.JsonObject
+import com.example.android.wearable.visualScheduleWatchface.calendar.EventItem
 import java.time.Duration
 import java.time.ZonedDateTime
 
@@ -21,18 +20,14 @@ class NotificationCreator(private val context: Context) {
         Notification(100, "Done!")
     )
 
-    private fun getTimeAtPercentage(percentage: Long, currentEvent: JsonObject): ZonedDateTime? {
-        if(currentEvent == null) return null
-        val startDateTime = getZonedDateTime(currentEvent.get("start").asJsonObject)
-        val endDateTime = getZonedDateTime(currentEvent.get("end").asJsonObject)
-
-        val eventDuration = Duration.between(startDateTime, endDateTime)
+    private fun getTimeAtPercentage(percentage: Long, eventItem: EventItem): ZonedDateTime? {
+        val eventDuration = Duration.between(eventItem.start, eventItem.end)
         val eventDurationAtPercentage = eventDuration.multipliedBy(percentage).dividedBy(100)
-        return startDateTime.plus(eventDurationAtPercentage)
+        return eventItem.start.plus(eventDurationAtPercentage)
     }
 
-    private fun getSecondsFromNow(notification: Notification, currentEvent: JsonObject): Long {
-        val timeAtPercentage = this.getTimeAtPercentage(notification.percentage, currentEvent)
+    private fun getSecondsFromNow(notification: Notification, eventItem: EventItem): Long {
+        val timeAtPercentage = this.getTimeAtPercentage(notification.percentage, eventItem)
 
         val now = ZonedDateTime.now()
         return Duration.between(now, timeAtPercentage).toMillis()
@@ -57,11 +52,11 @@ class NotificationCreator(private val context: Context) {
         this.pendingIntents.clear()
     }
 
-    fun createNotifications(currentEvent: JsonObject?){
-        if(currentEvent == null) return
+    fun createNotifications(eventItem: EventItem){
+        if(eventItem == null) return
 
         return this.percentagesForNotifications.forEach{
-            val secondsFromNow = this.getSecondsFromNow(it, currentEvent)
+            val secondsFromNow = this.getSecondsFromNow(it, eventItem)
             if(secondsFromNow <= 0) {
                 return
             }
